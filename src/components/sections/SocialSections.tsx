@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { supabase, isPlaceholder } from '@/lib/supabase';
-import { simulationStorage } from '@/lib/simulation';
+import { supabase } from '@/lib/supabase';
 
 const reviews = [
   {
@@ -144,42 +143,19 @@ export function ContactSection() {
 
     setIsSubmitting(true);
     try {
-      if (!isPlaceholder) {
-        const { error } = await supabase.from('inquiries').insert([{
-          customer_name: formData.name,
-          customer_email: formData.email,
-          message: formData.message,
-          status: 'PENDING'
-        }]);
-        if (error) throw error;
-      } else {
-        // Simulation Mode: Save to local storage
-        simulationStorage.addItem('INQUIRIES', {
-          customer_name: formData.name,
-          customer_email: formData.email,
-          message: formData.message,
-          status: 'PENDING'
-        });
-        await new Promise(resolve => setTimeout(resolve, 800));
-      }
-
-      setIsSuccess(true);
-      toast.success('Your message has been woven into our queue.');
-      setFormData({ name: '', email: '', message: '' });
-    } catch (error: any) {
-      if (!error.message?.includes('Failed to fetch')) {
-        console.warn('Supabase sync failed, routing locally:', error);
-      }
-      toast.warning('Network or DB unreachable. Inquiry routed locally pending sync.');
-      
-      simulationStorage.addItem('INQUIRIES', {
+      const { error } = await supabase.from('inquiries').insert([{
         customer_name: formData.name,
         customer_email: formData.email,
         message: formData.message,
         status: 'PENDING'
-      });
+      }]);
+      if (error) throw error;
+      
       setIsSuccess(true);
+      toast.success('Your message has been woven into our queue.');
       setFormData({ name: '', email: '', message: '' });
+    } catch (error: any) {
+      toast.error('Sync failed: ' + error.message);
     } finally {
       setIsSubmitting(false);
       setTimeout(() => setIsSuccess(false), 5000);

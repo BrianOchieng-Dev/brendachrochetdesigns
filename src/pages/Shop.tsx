@@ -8,8 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Product } from '@/types';
-import { supabase, isPlaceholder } from '@/lib/supabase';
-import { simulationStorage } from '@/lib/simulation';
+import { supabase } from '@/lib/supabase';
 
 const CATEGORIES = ['ALL', 'FASHION', 'ACCESSORIES', 'PATTERNS', 'EXCLUSIVES'] as const;
 
@@ -22,22 +21,30 @@ export function Shop() {
 
   useEffect(() => {
     fetchProducts();
+    
+    // Subscribe to changes in the products table
+    const channel = supabase
+      .channel('products-channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+        fetchProducts();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   async function fetchProducts() {
     try {
       setLoading(true);
-      if (isPlaceholder) {
-        setProducts(simulationStorage.getItems<Product>('PRODUCTS'));
-        return;
-      }
 
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error && error.message !== 'placeholder') throw error;
+      if (error) throw error;
       
       if (data && data.length > 0) {
         setProducts(data);
@@ -45,11 +52,7 @@ export function Shop() {
         setProducts([]);
       }
     } catch (error: any) {
-      if (error.message?.includes('Failed to fetch')) {
-        toast.error('Network error: Cannot reach the backend database.');
-      } else {
-        toast.error('Failed to load products: ' + error.message);
-      }
+      toast.error('Failed to load products: ' + error.message);
     } finally {
       setLoading(false);
     }

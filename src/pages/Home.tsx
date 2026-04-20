@@ -8,8 +8,7 @@ import { HeroCarousel } from '@/components/sections/HeroCarousel';
 import { BabylonCrochetViewer } from '@/components/Three/BabylonCrochetViewer';
 import { CustomerReviews, ContactSection, WhatsAppFloat } from '@/components/sections/SocialSections';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase, isPlaceholder } from '@/lib/supabase';
-import { simulationStorage } from '@/lib/simulation';
+import { supabase } from '@/lib/supabase';
 import { Product } from '@/types';
 
 export function Home() {
@@ -18,23 +17,29 @@ export function Home() {
 
   useEffect(() => {
     fetchFeatured();
+    
+    // Subscribe to changes in the products table
+    const channel = supabase
+      .channel('featured-products-channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+        fetchFeatured();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   async function fetchFeatured() {
     let data: Product[] = [];
     
     try {
-      if (isPlaceholder) {
-        data = simulationStorage.getItems<Product>('PRODUCTS').filter(p => p.is_featured);
-      } else {
-        const { data: supabaseData, error } = await supabase.from('products').select('*').eq('is_featured', true).limit(3);
-        if (error) throw error;
-        if (supabaseData) data = supabaseData;
-      }
+      const { data: supabaseData, error } = await supabase.from('products').select('*').eq('is_featured', true).limit(3);
+      if (error) throw error;
+      if (supabaseData) data = supabaseData;
     } catch (error: any) {
-      if (!error.message?.includes('Failed to fetch')) {
-        console.error('Home load error:', error);
-      }
+      console.error('Home load error:', error);
     }
     
     setFeatured(data);

@@ -29,8 +29,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Product, PortfolioItem, Inquiry } from '@/types';
-import { supabase, isPlaceholder } from '@/lib/supabase';
-import { simulationStorage } from '@/lib/simulation';
+import { supabase } from '@/lib/supabase';
 import { useAuth, AdminAuthority, UserRole } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { 
@@ -102,32 +101,8 @@ export function Admin() {
 
   async function fetchAllData() {
     setLoading(true);
+    
     try {
-      if (isPlaceholder) {
-        setProducts(simulationStorage.getItems<Product>('PRODUCTS'));
-        setPortfolio(simulationStorage.getItems<PortfolioItem>('PORTFOLIO'));
-        setInquiries(simulationStorage.getItems<Inquiry>('INQUIRIES'));
-        const profs = simulationStorage.getItems<any>('PROFILES');
-        setPersonnel(profs.map((p: any) => ({
-          id: p.id,
-          name: p.full_name || 'Artisanal Guest',
-          email: p.id.slice(0, 10) + '@studio.brenda',
-          role: p.role || 'GUEST',
-          status: 'ACTIVE'
-        })));
-        setActivities([
-          { u: 'System', a: 'Booted in Simulation Mode', icon: ShieldCheck, t: new Date().toLocaleTimeString() },
-          ...simulationStorage.getItems<any>('ACTIVITIES').map((a: any) => ({
-            u: a.user_name,
-            a: a.action,
-            icon: a.icon_type === 'user' ? UserCheck : ShieldCheck,
-            t: new Date(a.created_at).toLocaleTimeString()
-          }))
-        ]);
-        setLoading(false);
-        return;
-      }
-
       // 1. Fetch Products
       const { data: productsData } = await supabase.from('products').select('*').order('created_at', { ascending: false });
       if (productsData) setProducts(productsData);
@@ -173,11 +148,7 @@ export function Admin() {
       if (portfolioData) setPortfolio(portfolioData);
 
     } catch (error: any) {
-      if (error.message?.includes('Failed to fetch')) {
-        toast.warning('Network unreachable. Operating in offline simulation mode.');
-      } else {
         toast.error('Sync failed: ' + error.message);
-      }
     } finally {
       setLoading(false);
     }
@@ -196,15 +167,6 @@ export function Admin() {
       is_featured: formData.get('is_featured') === 'on'
     };
     
-    if (isPlaceholder) {
-      simulationStorage.addItem('PRODUCTS', product);
-      simulationStorage.addItem('ACTIVITIES', { user_name: displayName, action: `published a new design: ${product.name}`, icon_type: 'shield' });
-      toast.success('Simulation: Concept archived in the studio ledger.');
-      setIsAdding(false);
-      fetchAllData();
-      return;
-    }
-
     try {
       const { error } = await supabase.from('products').insert([product]);
       if (error) throw error;
@@ -212,14 +174,8 @@ export function Admin() {
       setIsAdding(false);
       fetchAllData();
     } catch (error: any) {
-      if (!error.message?.includes('Failed to fetch')) {
-        console.warn('Supabase sync failed, saving to simulation ledger:', error);
-      }
-      toast.warning('Network/DB unreachable. Saving to local ledger pending sync.');
-      simulationStorage.addItem('PRODUCTS', product);
-      simulationStorage.addItem('ACTIVITIES', { user_name: displayName, action: `published a new design: ${product.name}`, icon_type: 'shield' });
+      toast.error('Sync failed: ' + error.message);
       setIsAdding(false);
-      fetchAllData();
     }
   }
 
@@ -233,15 +189,6 @@ export function Admin() {
       description: formData.get('description') as string,
     };
     
-    if (isPlaceholder) {
-      simulationStorage.addItem('PORTFOLIO', item);
-      simulationStorage.addItem('ACTIVITIES', { user_name: displayName, action: `calibrated portfolio with: ${item.title}`, icon_type: 'shield' });
-      toast.success('Simulation: Portfolio calibrated with new work.');
-      setIsAddingPortfolio(false);
-      fetchAllData();
-      return;
-    }
-
     try {
       const { error } = await supabase.from('portfolio').insert([item]);
       if (error) throw error;
@@ -249,14 +196,8 @@ export function Admin() {
       setIsAddingPortfolio(false);
       fetchAllData();
     } catch (error: any) {
-      if (!error.message?.includes('Failed to fetch')) {
-        console.warn('Supabase sync failed, saving to simulation ledger:', error);
-      }
-      toast.warning('Network/DB unreachable. Saving to local ledger pending sync.');
-      simulationStorage.addItem('PORTFOLIO', item);
-      simulationStorage.addItem('ACTIVITIES', { user_name: displayName, action: `calibrated portfolio with: ${item.title}`, icon_type: 'shield' });
+      toast.error('Sync failed: ' + error.message);
       setIsAddingPortfolio(false);
-      fetchAllData();
     }
   }
 
@@ -404,32 +345,7 @@ export function Admin() {
               ))}
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-8">
-               <Card className="lg:col-span-2 glass-panel border-black/5 rounded-lg overflow-hidden">
-                <CardHeader className="border-b border-black/5 bg-black/[0.02] p-10 flex flex-row items-center justify-between">
-                  <CardTitle className="text-xl font-bold flex items-center gap-4 text-foreground uppercase tracking-widest">
-                    <TrendingUp className="w-7 h-7 text-secondary" /> Enterprise Velocity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-10 h-[450px] min-h-[450px]">
-                  <ResponsiveContainer width="100%" height="100%" minHeight={450}>
-                    <AreaChart data={data}>
-                      <defs>
-                        <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#ff0000" stopOpacity={0.2}/>
-                          <stop offset="95%" stopColor="#ff0000" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                      <XAxis dataKey="name" stroke="rgba(0,0,0,0.4)" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 700}} dy={15} />
-                      <YAxis stroke="rgba(0,0,0,0.4)" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 700}} />
-                      <ChartTooltip contentStyle={{ backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(20px)', border: 'none', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} />
-                      <Area type="monotone" dataKey="sales" stroke="#ff0000" fillOpacity={1} fill="url(#colorSales)" strokeWidth={4} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
+             <div className="grid lg:grid-cols-1 gap-8">
               <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-8">
                 <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
                   <Globe className="w-6 h-6 text-secondary" /> Global Feed

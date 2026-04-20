@@ -4,8 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState, useEffect } from 'react';
 import { Camera, Layers, Scissors, Sparkles } from 'lucide-react';
-import { supabase, isPlaceholder } from '@/lib/supabase';
-import { simulationStorage } from '@/lib/simulation';
+import { supabase } from '@/lib/supabase';
 import { PortfolioItem } from '@/types';
 import { toast } from 'sonner';
 
@@ -21,20 +20,12 @@ export function Portfolio() {
   async function fetchPortfolio() {
     try {
       setLoading(true);
-      if (isPlaceholder) {
-        setItems(simulationStorage.getItems<PortfolioItem>('PORTFOLIO'));
-        return;
-      }
 
       const { data, error } = await supabase.from('portfolio').select('*').order('created_at', { ascending: false });
-      if (error && error.message !== 'placeholder') throw error;
+      if (error) throw error;
       setItems(data || []);
     } catch (error: any) {
-      if (error.message?.includes('Failed to fetch')) {
-        toast.warning('Network unreachable. Operating in offline simulation mode.');
-      } else {
-        toast.error('Failed to load portfolio: ' + error.message);
-      }
+      toast.error('Failed to load portfolio: ' + error.message);
     } finally {
       setLoading(false);
     }
