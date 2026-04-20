@@ -52,7 +52,11 @@ export function Shop() {
         setProducts([]);
       }
     } catch (error: any) {
-      toast.error('Failed to load products: ' + error.message);
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        console.warn('Network connection to Supabase failed. Please check your VITE_SUPABASE_URL configuration.');
+      } else {
+        toast.error('Failed to load products: ' + error.message);
+      }
     } finally {
       setLoading(false);
     }

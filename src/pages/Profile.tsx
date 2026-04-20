@@ -26,7 +26,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { supabase, isPlaceholder } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 const MOCK_ACTIVITIES: any[] = [];
 
@@ -56,8 +56,7 @@ export function Profile() {
 
   async function fetchProfileStats() {
     if (!user) return;
-    if (isPlaceholder) return;
-
+    
     try {
       // Fetch order count
       const { count: oCount, error } = await supabase.from('orders').select('*', { count: 'exact', head: true }).eq('id', user.id); // This is just a simulation of the 'orders' table. In a real app we'd join on user_id

@@ -81,21 +81,18 @@ export function Admin() {
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('simulation_update', handleStorageChange);
 
-    // Setup Supabase Realtime if live
-    let channel: any;
-    if (!isPlaceholder) {
-      channel = supabase
-        .channel('admin-updates')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'inquiries' }, () => {
-          fetchAllData();
-        })
-        .subscribe();
-    }
+    // Setup Supabase Realtime
+    const channel = supabase
+      .channel('admin-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'inquiries' }, () => {
+        fetchAllData();
+      })
+      .subscribe();
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('simulation_update', handleStorageChange);
-      if (channel) supabase.removeChannel(channel);
+      supabase.removeChannel(channel);
     };
   }, []);
 
@@ -169,12 +166,16 @@ export function Admin() {
     
     try {
       const { error } = await supabase.from('products').insert([product]);
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase Insert Error:', error);
+        throw error;
+      }
       toast.success('Concept archived in the studio ledger.');
       setIsAdding(false);
       fetchAllData();
     } catch (error: any) {
-      toast.error('Sync failed: ' + error.message);
+      console.error('handleAddProduct Error:', error);
+      toast.error('Sync failed: ' + (error.message || 'Unknown error'));
       setIsAdding(false);
     }
   }
@@ -205,13 +206,6 @@ export function Admin() {
     const response = prompt('Craft your response to the customer:');
     if (!response) return;
 
-    if (isPlaceholder) {
-      simulationStorage.updateItem<Inquiry>('INQUIRIES', id, { status: 'RESOLVED', response, updated_at: new Date().toISOString() });
-      toast.success('Simulation: Inquiry resolved. Customer notified via record.');
-      fetchAllData();
-      return;
-    }
-
     try {
       const { error } = await supabase.from('inquiries').update({ 
         status: 'RESOLVED',
@@ -232,11 +226,6 @@ export function Admin() {
     const currentIndex = roles.indexOf(currentRole as UserRole);
     const nextRole = roles[(currentIndex + 1) % roles.length];
 
-    if (isPlaceholder) {
-      toast.success(`Simulation: Access elevated to ${nextRole} tier.`);
-      return;
-    }
-
     try {
       const { error } = await supabase.from('profiles').update({ role: nextRole }).eq('id', personId);
       if (error) throw error;
@@ -250,11 +239,6 @@ export function Admin() {
   async function updateNarrative(section: string) {
     const newContent = prompt('Enter new narrative content:');
     if (!newContent) return;
-
-    if (isPlaceholder) {
-      toast.success('Simulation: Studio narrative recalibrated.');
-      return;
-    }
 
     try {
       const { error } = await supabase.from('narratives').upsert({ section, content: newContent });

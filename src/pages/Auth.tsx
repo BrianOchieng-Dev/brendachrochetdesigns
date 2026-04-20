@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Lock, User, ArrowRight, Loader2, Scissors } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabase, isPlaceholder } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -35,11 +35,6 @@ export function Auth() {
 
         const loginEmail = isAdminEmail ? 'admin@brendadesigns.com' : email;
 
-        if (isPlaceholder) {
-          toast.error('Supabase not configured. Please add VITE_SUPABASE_URL to your settings.');
-          return;
-        }
-
         const { error } = await supabase.auth.signInWithPassword({
           email: loginEmail,
           password,
@@ -48,11 +43,6 @@ export function Auth() {
         toast.success(`Welcome back to the studio${isAdminEmail ? ', Admin' : ''}.`);
         navigate(isAdminEmail ? '/admin' : '/profile');
       } else {
-        if (isPlaceholder) {
-          toast.error('Supabase not configured. Please add VITE_SUPABASE_URL and Anon Key to your settings to enable registration.');
-          return;
-        }
-
         const { error } = await supabase.auth.signUp({
           email,
           password,

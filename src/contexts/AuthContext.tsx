@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase, isPlaceholder } from '../lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export type UserRole = 'GUEST' | 'COLLECTOR' | 'MUSE' | 'ADMIN';
 
@@ -38,12 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isPlaceholder) {
-      console.warn('Supabase is using placeholder credentials. Auth state is limited.');
-      setIsLoading(false);
-      return;
-    }
-
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);

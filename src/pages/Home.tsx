@@ -39,7 +39,11 @@ export function Home() {
       if (error) throw error;
       if (supabaseData) data = supabaseData;
     } catch (error: any) {
-      console.error('Home load error:', error);
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        console.warn('Network connection to Supabase failed. Please check your VITE_SUPABASE_URL configuration.');
+      } else {
+        console.error('Home load error:', error);
+      }
     }
     
     setFeatured(data);
@@ -93,13 +97,13 @@ export function Home() {
           <div className="grid md:grid-cols-2 gap-20 items-center">
             <div className="space-y-8 relative z-10">
               <Badge className="bg-secondary/10 text-secondary border-secondary/30 font-bold px-4 py-2 text-sm tracking-widest uppercase mb-4">
-                Babylon.js 9.0 Optimized
+                Artisanal Fiber Precision
               </Badge>
               <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-[0.85] text-glow uppercase">
-                Designing in <span className="text-secondary italic">Infinity.</span>
+                Designing in <span className="text-secondary italic">Every Stitch.</span>
               </h2>
               <p className="text-lg md:text-xl text-muted-foreground font-medium leading-relaxed max-w-lg">
-                Brenda's designs are now powered by Babylon.js 9.0, featuring a high-density "Yarn Particle" system and clustered lighting to visualize thousands of unique fiber interactions.
+                Brenda's designs are visualized with high-density "Yarn Particle" systems and clustered lighting to showcase the intricate, unique texture of every fiber interaction.
               </p>
               <div className="flex gap-6">
                 <Button className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-14 px-10 font-bold text-lg shadow-[0_10px_25px_rgba(255,0,0,0.2)]">
