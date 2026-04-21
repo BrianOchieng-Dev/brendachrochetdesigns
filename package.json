@@ -11,9 +11,9 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@babylonjs/core": "^9.3.1",
+    "@babylonjs/core": "^8.56.2",
     "@babylonjs/gui": "^8.56.2",
-    "@babylonjs/loaders": "^9.3.1",
+    "@babylonjs/loaders": "^8.56.2",
     "@base-ui/react": "^1.4.0",
     "@fontsource-variable/geist": "^5.2.8",
     "@google/genai": "^1.29.0",
