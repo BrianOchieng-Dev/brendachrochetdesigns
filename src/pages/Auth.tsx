@@ -61,7 +61,7 @@ export function Auth() {
           },
         });
         if (error) throw error;
-        toast.success('Welcome to the collective. Your journey begins once you verify your email.');
+        toast.success('Welcome to the collective. Begin your journey.');
       }
     } catch (error: any) {
       if (error.message?.includes('Failed to fetch')) {

@@ -159,7 +159,7 @@ export function Home() {
                     Exhibition Choice
                   </Badge>
                   <img 
-                    src={mainFeatured.image_urls[0]} 
+                    src={mainFeatured.image_urls?.[0] || mainFeatured.image_url || ''} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
                     alt={mainFeatured.name}
                     referrerPolicy="no-referrer"
@@ -207,7 +207,7 @@ export function Home() {
                     <div className="flex-1 flex flex-col md:flex-row">
                       <div className="w-full md:w-1/2 aspect-square md:aspect-auto overflow-hidden relative">
                         <img 
-                          src={item.image_urls[0]} 
+                          src={item.image_urls?.[0] || item.image_url || ''} 
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           alt={item.name}
                           referrerPolicy="no-referrer"

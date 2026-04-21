@@ -70,6 +70,8 @@ export function Admin() {
   const [isAdding, setIsAdding] = useState(false);
   const [isAddingPortfolio, setIsAddingPortfolio] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState('DASHBOARD');
 
   const displayName = user?.user_metadata?.full_name || 'Maestro';
 
@@ -192,28 +194,59 @@ export function Admin() {
     e.preventDefault();
 
     const formData = new FormData(e.target as HTMLFormElement);
-    const product = {
-      name: formData.get('name') as string,
-      price: Number(formData.get('price')),
-      image_url: formData.get('image') as string,
-      description: formData.get('description') as string,
-      category: formData.get('category') as any,
-      is_featured: formData.get('is_featured') === 'on'
-    };
-    
+    const imageLink = formData.get('image') as string;
+    const fileInput = (e.target as HTMLFormElement).querySelector('input[type="file"]') as HTMLInputElement;
+    const file = fileInput?.files?.[0];
+
+    let finalImageUrl = imageLink;
+
     try {
-      const { error } = await supabase.from('products').insert([product]);
-      if (error) {
-        console.error('Supabase Insert Error:', error);
-        throw error;
+      if (file) {
+        setIsUploading(true);
+        // Size validation (2MB)
+        if (file.size > 2 * 1024 * 1024) {
+          throw new Error('Asset exceeds 2MB limit. Please curate a smaller version.');
+        }
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `design-${Math.random()}.${fileExt}`;
+        const filePath = `products/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('products')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('products')
+          .getPublicUrl(filePath);
+        
+        finalImageUrl = publicUrl;
       }
+
+      if (!finalImageUrl) throw new Error('A visual asset (link or file) is required.');
+
+      const product = {
+        name: formData.get('name') as string,
+        price: Number(formData.get('price')),
+        image_url: finalImageUrl,
+        description: formData.get('description') as string,
+        category: formData.get('category') as any,
+        is_featured: formData.get('is_featured') === 'on'
+      };
+      
+      const { error } = await supabase.from('products').insert([product]);
+      if (error) throw error;
+
       toast.success('Concept archived in the studio ledger.');
       setIsAdding(false);
       fetchAllData();
     } catch (error: any) {
       console.error('handleAddProduct Error:', error);
       toast.error('Sync failed: ' + (error.message || 'Unknown error'));
-      setIsAdding(false);
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -221,14 +254,45 @@ export function Admin() {
     if (!isConfigured) return;
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    const item = {
-      title: formData.get('title') as string,
-      category: formData.get('category') as string,
-      image_url: formData.get('image') as string,
-      description: formData.get('description') as string,
-    };
+    const imageLink = formData.get('image') as string;
+    const fileInput = (e.target as HTMLFormElement).querySelector('input[type="file"]') as HTMLInputElement;
+    const file = fileInput?.files?.[0];
+
+    let finalImageUrl = imageLink;
     
     try {
+      if (file) {
+        setIsUploading(true);
+        if (file.size > 2 * 1024 * 1024) {
+          throw new Error('Asset exceeds 2MB limit.');
+        }
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `portfolio-${Math.random()}.${fileExt}`;
+        const filePath = `portfolio/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('portfolio')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('portfolio')
+          .getPublicUrl(filePath);
+        
+        finalImageUrl = publicUrl;
+      }
+
+      if (!finalImageUrl) throw new Error('Asset required.');
+
+      const item = {
+        title: formData.get('title') as string,
+        category: formData.get('category') as string,
+        image_url: finalImageUrl,
+        description: formData.get('description') as string,
+      };
+      
       const { error } = await supabase.from('portfolio').insert([item]);
       if (error) throw error;
       toast.success('Portfolio calibrated with new work.');
@@ -236,7 +300,8 @@ export function Admin() {
       fetchAllData();
     } catch (error: any) {
       toast.error('Sync failed: ' + error.message);
-      setIsAddingPortfolio(false);
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -693,9 +758,36 @@ export function Admin() {
                   </div>
 
                   <div className="space-y-8">
-                    <div className="space-y-3">
-                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Visual Asset (URL)</label>
-                      <Input name="image" className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-medium" placeholder="https://unsplash.com/..." />
+                    <div className="space-y-6">
+                      <div className="space-y-3">
+                        <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Visual Asset (Link)</label>
+                        <Input 
+                          name="image" 
+                          className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-medium" 
+                          placeholder="https://images.unsplash.com/..." 
+                          disabled={isUploading}
+                        />
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t border-black/5" />
+                        </div>
+                        <div className="relative flex justify-center text-[10px] uppercase font-bold text-muted-foreground bg-white/90 px-4">
+                          Or local upload
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest cursor-pointer hover:text-secondary transition-colors flex items-center gap-2">
+                           <Upload className="w-4 h-4" />
+                           Design Template (Max 2MB)
+                        </label>
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-secondary/10 file:text-secondary hover:file:bg-secondary/20 bg-white/50 rounded-lg p-2 border border-black/5"
+                          disabled={isUploading}
+                        />
+                      </div>
                     </div>
                     <div className="space-y-3">
                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Artistic Statement</label>
@@ -703,10 +795,22 @@ export function Admin() {
                         name="description"
                         className="w-full h-40 glass-panel rounded-lg border-black/5 p-8 outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/20 transition-all font-medium text-lg leading-relaxed text-foreground bg-white/50"
                         placeholder="Materiality, silhouette, and technique..."
+                        disabled={isUploading}
                       />
                     </div>
-                    <Button type="submit" className="w-full rounded-full bg-secondary text-white h-20 font-bold uppercase text-lg tracking-widest shadow-[0_15px_40px_rgba(255,0,0,0.2)]">
-                      Publish Design
+                    <Button 
+                      type="submit" 
+                      disabled={isUploading}
+                      className="w-full rounded-full bg-secondary text-white h-20 font-bold uppercase text-lg tracking-widest shadow-[0_15px_40px_rgba(255,0,0,0.2)]"
+                    >
+                      {isUploading ? (
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                          Archiving Concept...
+                        </div>
+                      ) : (
+                        'Publish Design'
+                      )}
                     </Button>
                   </div>
                 </form>
@@ -748,9 +852,36 @@ export function Admin() {
                   </div>
 
                   <div className="space-y-8">
-                    <div className="space-y-3">
-                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Visual Documentation (URL)</label>
-                      <Input name="image" className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-medium" placeholder="URL to project image" />
+                    <div className="space-y-6">
+                      <div className="space-y-3">
+                        <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Visual Documentation (Link)</label>
+                        <Input 
+                          name="image" 
+                          className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-medium" 
+                          placeholder="URL to project image" 
+                          disabled={isUploading}
+                        />
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t border-black/5" />
+                        </div>
+                        <div className="relative flex justify-center text-[10px] uppercase font-bold text-muted-foreground bg-white/90 px-4">
+                          Or local upload
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest cursor-pointer hover:text-secondary transition-colors flex items-center gap-2">
+                           <Upload className="w-4 h-4" />
+                           Asset Upload (Max 2MB)
+                        </label>
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-secondary/10 file:text-secondary hover:file:bg-secondary/20 bg-white/50 rounded-lg p-2 border border-black/5"
+                          disabled={isUploading}
+                        />
+                      </div>
                     </div>
                     <div className="space-y-3">
                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Project Narrative</label>
@@ -758,10 +889,22 @@ export function Admin() {
                         name="description"
                         className="w-full h-40 glass-panel rounded-lg border-black/5 p-8 outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/20 transition-all font-medium text-lg leading-relaxed text-foreground bg-white/50"
                         placeholder="The concept, the technique, the journey..."
+                        disabled={isUploading}
                       />
                     </div>
-                    <Button type="submit" className="w-full rounded-full bg-black text-white h-20 font-bold uppercase text-lg tracking-widest">
-                      Calibrate Portfolio
+                    <Button 
+                      type="submit" 
+                      disabled={isUploading}
+                      className="w-full rounded-full bg-black text-white h-20 font-bold uppercase text-lg tracking-widest"
+                    >
+                      {isUploading ? (
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                          Calibrating...
+                        </div>
+                      ) : (
+                        'Calibrate Portfolio'
+                      )}
                     </Button>
                   </div>
                 </form>

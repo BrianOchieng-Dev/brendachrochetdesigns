@@ -35,6 +35,7 @@ export function Profile() {
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '');
   const [isEditing, setIsEditing] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(user?.user_metadata?.avatar_url || '');
+  const [isUpdating, setIsUpdating] = useState(false);
   const [orderCount, setOrderCount] = useState(0);
   const [savedCount, setSavedCount] = useState(0);
   const [measurements, setMeasurements] = useState(user?.user_metadata?.measurements || {
@@ -104,6 +105,7 @@ export function Profile() {
     if (!file || !user) return;
 
     try {
+      setIsUpdating(true);
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}-${Math.random()}.${fileExt}`;
       const filePath = `${fileName}`;
@@ -129,11 +131,12 @@ export function Profile() {
       
       setAvatarUrl(publicUrl);
       toast.success('Your visual identity has been updated.');
-      // Reload to ensure all components (like Header) sync up
-      window.location.reload();
+      // No reload needed now, we update local state and let AuthContext sync on next session or manual update
     } catch (error: any) {
       console.error('Upload error:', error);
       toast.error('Avatar update failed: ' + (error.message || 'Check if "profile" bucket exists'));
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -170,9 +173,15 @@ export function Profile() {
                     <User className="w-16 h-16" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                  <Camera className="w-8 h-8" />
-                </div>
+                {isUpdating ? (
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center text-white">
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : (
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                    <Camera className="w-8 h-8" />
+                  </div>
+                )}
               </div>
               <div className="absolute -bottom-2 -right-2 p-2 bg-secondary rounded-full border-4 border-background text-white shadow-lg">
                 {isVIP ? <Crown className="w-5 h-5" /> : isMuse ? <Crown className="w-5 h-5 opacity-70" /> : <Sparkles className="w-5 h-5" />}
@@ -180,6 +189,10 @@ export function Profile() {
             </div>
 
             <div className="flex-1 text-center md:text-left space-y-4">
+              <div className="space-y-1">
+                {isUpdating && (
+                  <p className="text-secondary font-bold animate-pulse text-sm uppercase tracking-widest mb-2">Curating Visual Identity...</p>
+                )}
               <div className="space-y-1">
                 <Badge className="bg-secondary/10 text-secondary border-secondary/20 font-bold px-3 py-1 text-[10px] tracking-widest uppercase mb-2">
                   {role} Member
