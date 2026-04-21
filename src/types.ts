@@ -83,3 +83,12 @@ export interface Category {
   name: string;
   slug: string;
 }
+
+export interface Philosophy {
+  id: string;
+  title: string;
+  content: string;
+  image_url?: string;
+  icon_name?: string;
+  created_at: string;
+}

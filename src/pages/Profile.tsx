@@ -193,7 +193,6 @@ export function Profile() {
                 {isUpdating && (
                   <p className="text-secondary font-bold animate-pulse text-sm uppercase tracking-widest mb-2">Curating Visual Identity...</p>
                 )}
-              <div className="space-y-1">
                 <Badge className="bg-secondary/10 text-secondary border-secondary/20 font-bold px-3 py-1 text-[10px] tracking-widest uppercase mb-2">
                   {role} Member
                 </Badge>

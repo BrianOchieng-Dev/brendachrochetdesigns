@@ -21,14 +21,19 @@ import {
   ArrowUpRight,
   UserCheck,
   Ban,
-  Crown
+  Crown,
+  Upload,
+  Sparkles,
+  Scissors,
+  Leaf,
+  Factory
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Product, PortfolioItem, Inquiry } from '@/types';
+import { Product, PortfolioItem, Inquiry, Philosophy } from '@/types';
 import { supabase, isConfigured } from '@/lib/supabase';
 import { useAuth, AdminAuthority, UserRole } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -57,9 +62,9 @@ export function Admin() {
   const { user, hasAuthority, isAdmin } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [personnel, setPersonnel] = useState<any[]>([]);
-  const [activities, setActivities] = useState<any[]>([]);
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [portfolio, setPortfolio] = useState<any[]>([]);
+  const [philosophies, setPhilosophies] = useState<Philosophy[]>([]);
   const [stats, setStats] = useState({
     revenue: 'Ksh 0',
     commissions: '0',
@@ -69,8 +74,10 @@ export function Admin() {
   const [velocity, setVelocity] = useState(data);
   const [isAdding, setIsAdding] = useState(false);
   const [isAddingPortfolio, setIsAddingPortfolio] = useState(false);
+  const [isAddingPhilosophy, setIsAddingPhilosophy] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingPortfolioItem, setEditingPortfolioItem] = useState<PortfolioItem | null>(null);
+  const [editingPhilosophy, setEditingPhilosophy] = useState<Philosophy | null>(null);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState('DASHBOARD');
@@ -145,7 +152,9 @@ export function Admin() {
       // 3. Fetch Personnel with metrics
       const { data: profilesData } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
       const { data: ordersDataForUsers } = await supabase.from('orders').select('customer_id');
+      const { data: philData } = await supabase.from('philosophies').select('*').order('created_at', { ascending: true });
       
+      if (philData) setPhilosophies(philData);
       if (profilesData) {
         setPersonnel(profilesData.map(p => {
           const userOrders = ordersDataForUsers?.filter(o => o.customer_id === p.id) || [];
@@ -154,7 +163,7 @@ export function Admin() {
           return {
             id: p.id,
             name: p.full_name || 'Anonymous',
-            email: p.id, 
+            email: p.email || 'No email documented', 
             role: p.role,
             createdAt: p.created_at,
             orderCount: userOrders.length,
@@ -188,11 +197,6 @@ export function Admin() {
         toast.error('Sync failed: ' + error.message);
     } finally {
       setLoading(false);
-    }
-  }
-
-    } finally {
-      setIsUploading(false);
     }
   }
 
@@ -381,12 +385,6 @@ export function Admin() {
       toast.error('Deletion failed: ' + error.message);
     }
   }
-    } catch (error: any) {
-      toast.error('Sync failed: ' + error.message);
-    } finally {
-      setIsUploading(false);
-    }
-  }
 
   async function handleResolveInquiry(id: string) {
     if (!isConfigured) return;
@@ -413,14 +411,15 @@ export function Admin() {
     const roles: UserRole[] = ['COLLECTOR', 'MUSE', 'VIP'];
     const currentIndex = roles.indexOf(currentRole as UserRole);
     
+    let nextRole: UserRole;
+    
     if (currentIndex === -1 && currentRole !== 'ADMIN') {
-      // Default to Collector if unknown and not Admin
-      var nextRole: UserRole = 'COLLECTOR';
+      nextRole = 'COLLECTOR';
     } else if (currentRole === 'VIP' || currentRole === 'ADMIN') {
       toast.info('This user has already reached the maximum tier or is an Admin.');
       return;
     } else {
-      var nextRole: UserRole = roles[currentIndex + 1];
+      nextRole = roles[currentIndex + 1];
     }
 
     try {
@@ -446,6 +445,56 @@ export function Admin() {
       toast.error('Calibration failed: ' + error.message);
     }
   }
+
+  const handleSavePhilosophy = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!isConfigured) return;
+
+    const formData = new FormData(e.currentTarget);
+    const philosophyData = {
+      title: formData.get('title') as string,
+      content: formData.get('content') as string,
+      icon_name: formData.get('icon_name') as string,
+      image_url: formData.get('image_url') as string,
+    };
+
+    setIsUploading(true);
+    try {
+      if (editingPhilosophy) {
+        const { error } = await supabase
+          .from('philosophies')
+          .update(philosophyData)
+          .eq('id', editingPhilosophy.id);
+        if (error) throw error;
+        toast.success('Philosophy Refined');
+      } else {
+        const { error } = await supabase
+          .from('philosophies')
+          .insert([philosophyData]);
+        if (error) throw error;
+        toast.success('Philosophy Documented');
+      }
+      fetchAllData();
+      setIsAddingPhilosophy(false);
+      setEditingPhilosophy(null);
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeletePhilosophy = async (id: string) => {
+    if (!isConfigured || !window.confirm('Strike this philosophy from the record?')) return;
+    try {
+      const { error } = await supabase.from('philosophies').delete().eq('id', id);
+      if (error) throw error;
+      toast.success('Philosophy Redacted');
+      fetchAllData();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
 
   // Permission Check Helper for the UI
   const AuthGate = ({ authority, children }: { authority: AdminAuthority, children: React.ReactNode }) => {
@@ -495,6 +544,7 @@ export function Admin() {
             <TabsTrigger value="OVERVIEW" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Overview</TabsTrigger>
             <TabsTrigger value="CUSTOMERS" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Collective</TabsTrigger>
             <TabsTrigger value="CONTENT" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Materiality</TabsTrigger>
+            <TabsTrigger value="PHILOSOPHY" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Philosophy</TabsTrigger>
             <TabsTrigger value="INQUIRIES" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Inquiries</TabsTrigger>
             <TabsTrigger value="TECHNICAL" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Operations</TabsTrigger>
           </TabsList>
@@ -721,52 +771,170 @@ export function Admin() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="CONTENT" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 outline-none">
-            {/* 2. Content Management Roles */}
+          <TabsContent value="CONTENT" className="space-y-12 outline-none">
+            {/* Action Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <AuthGate authority="DROP_COORDINATOR">
+                <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+                  <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
+                    <Package className="w-8 h-8 text-secondary" />
+                  </div>
+                  <h3 className="text-2xl font-bold uppercase tracking-tight">Collection Drops</h3>
+                  <p className="text-sm text-muted-foreground font-medium italic">Publish new designs directly to the commercial collection.</p>
+                  <Button 
+                    onClick={() => {
+                      setEditingProduct(null);
+                      setIsAdding(true);
+                    }}
+                    className="w-full rounded-full bg-secondary text-white font-bold uppercase text-[10px] tracking-widest h-12 shadow-[0_10px_25px_rgba(255,0,0,0.15)]"
+                  >
+                    Initiate Drop
+                  </Button>
+                </Card>
+              </AuthGate>
+
+              <AuthGate authority="STORYTELLING_LEAD">
+                <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+                  <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
+                    <Palette className="w-8 h-8 text-secondary" />
+                  </div>
+                  <h3 className="text-2xl font-bold uppercase tracking-tight">Portfolio Calibration</h3>
+                  <p className="text-sm text-muted-foreground font-medium italic">Showcase high-couture projects and artisanal milestones.</p>
+                  <Button 
+                    onClick={() => {
+                      setEditingPortfolioItem(null);
+                      setIsAddingPortfolio(true);
+                    }}
+                    variant="outline" 
+                    className="w-full rounded-full border-black/5 font-bold uppercase text-[10px] tracking-widest h-12"
+                  >
+                    Curate Project
+                  </Button>
+                </Card>
+              </AuthGate>
+
+              <AuthGate authority="STORYTELLING_LEAD">
+                <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+                  <h3 className="text-2xl font-bold uppercase tracking-tight">Narrative Specs</h3>
+                  <p className="text-sm text-muted-foreground font-medium italic">Update the studio's craftsmanship philosophies.</p>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => updateNarrative('craftsmanship')}
+                    className="w-full rounded-full border border-black/5 font-bold uppercase text-[10px] tracking-widest h-12"
+                  >
+                    Edit Philosophies
+                  </Button>
+                </Card>
+              </AuthGate>
+            </div>
+
+            {/* Designs Management List */}
             <AuthGate authority="DROP_COORDINATOR">
-               <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
-                <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
-                  <Package className="w-8 h-8 text-secondary" />
-                </div>
-                <h3 className="text-2xl font-bold uppercase tracking-tight">Collection Drops</h3>
-                <p className="text-sm text-muted-foreground font-medium italic">Publish new designs directly to the commercial collection.</p>
-                <Button 
-                  onClick={() => setIsAdding(true)}
-                  className="w-full rounded-full bg-secondary text-white font-bold uppercase text-[10px] tracking-widest h-12 shadow-[0_10px_25px_rgba(255,0,0,0.15)]"
-                >
-                  Initiate Drop
-                </Button>
+              <Card className="glass-panel border-black/5 rounded-lg overflow-hidden">
+                <CardHeader className="p-10 border-b border-black/5 bg-black/[0.02]">
+                  <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
+                    <Package className="w-7 h-7 text-secondary" /> Commercial Designs Ledger
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y divide-black/5">
+                    {products.length === 0 ? (
+                      <div className="p-20 text-center italic text-muted-foreground">No designs archived.</div>
+                    ) : (
+                      products.map((product) => (
+                        <div key={product.id} className="p-8 flex items-center justify-between hover:bg-black/[0.01] transition-all">
+                          <div className="flex items-center gap-6">
+                            <div className="w-20 h-24 rounded-lg bg-black/5 overflow-hidden border border-black/5 flex-shrink-0">
+                              <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="font-bold text-lg uppercase tracking-tight leading-tight">{product.name}</h4>
+                              <p className="text-xs font-bold text-secondary">Ksh {product.price.toLocaleString()}</p>
+                              <div className="flex gap-2">
+                                <Badge variant="outline" className="text-[9px] uppercase font-bold tracking-widest opacity-60">{product.category}</Badge>
+                                {product.is_featured && <Badge className="bg-secondary/10 text-secondary border-secondary/20 text-[9px]">FEATURED</Badge>}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-full hover:bg-secondary/10 hover:text-secondary"
+                              onClick={() => {
+                                setEditingProduct(product);
+                                setIsAdding(true);
+                              }}
+                            >
+                              <Edit className="w-5 h-5" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-full hover:bg-red-500/10 hover:text-red-500"
+                              onClick={() => handleDeleteProduct(product.id, product.image_url || '')}
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
               </Card>
             </AuthGate>
 
+            {/* Portfolio Management List */}
             <AuthGate authority="STORYTELLING_LEAD">
-              <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
-                <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
-                   <Palette className="w-8 h-8 text-secondary" />
-                </div>
-                <h3 className="text-2xl font-bold uppercase tracking-tight">Portfolio Calibration</h3>
-                <p className="text-sm text-muted-foreground font-medium italic">Showcase high-couture projects and artisanal milestones.</p>
-                <Button 
-                  onClick={() => setIsAddingPortfolio(true)}
-                  variant="outline" 
-                  className="w-full rounded-full border-black/5 font-bold uppercase text-[10px] tracking-widest h-12"
-                >
-                  Curate Project
-                </Button>
-              </Card>
-            </AuthGate>
-
-            <AuthGate authority="STORYTELLING_LEAD">
-              <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
-                <h3 className="text-2xl font-bold uppercase tracking-tight">Narrative Specs</h3>
-                <p className="text-sm text-muted-foreground font-medium italic">Update the studio's craftsmanship philosophies.</p>
-                <Button 
-                  variant="ghost" 
-                  onClick={() => updateNarrative('craftsmanship')}
-                  className="w-full rounded-full border border-black/5 font-bold uppercase text-[10px] tracking-widest h-12"
-                >
-                  Edit Philosophies
-                </Button>
+              <Card className="glass-panel border-black/5 rounded-lg overflow-hidden">
+                <CardHeader className="p-10 border-b border-black/5 bg-black/[0.02]">
+                  <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
+                    <Palette className="w-7 h-7 text-secondary" /> Portfolio Milestones
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y divide-black/5">
+                    {portfolio.length === 0 ? (
+                      <div className="p-20 text-center italic text-muted-foreground">No artistic milestones curated.</div>
+                    ) : (
+                      portfolio.map((item) => (
+                        <div key={item.id} className="p-8 flex items-center justify-between hover:bg-black/[0.01] transition-all">
+                          <div className="flex items-center gap-6">
+                            <div className="w-24 h-24 rounded-md bg-black/5 overflow-hidden border border-black/5 flex-shrink-0">
+                              <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="font-bold text-lg uppercase tracking-tight leading-tight">{item.title}</h4>
+                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">{item.category}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                             <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="rounded-full hover:bg-secondary/10 hover:text-secondary"
+                                onClick={() => {
+                                  setEditingPortfolioItem(item);
+                                  setIsAddingPortfolio(true);
+                                }}
+                              >
+                                <Edit className="w-5 h-5" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="rounded-full hover:bg-red-500/10 hover:text-red-500"
+                                onClick={() => handleDeletePortfolio(item.id, item.image_url || '')}
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
               </Card>
             </AuthGate>
           </TabsContent>
@@ -803,29 +971,29 @@ export function Admin() {
               <div className="glass-panel p-8 md:p-16 rounded-lg max-w-4xl w-full border-white/10 space-y-12 relative bg-white/90 shadow-2xl my-auto">
                 <div className="flex justify-between items-start">
                   <div className="space-y-4">
-                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground uppercase">Initiate Drop</h2>
-                    <p className="text-muted-foreground font-medium italic text-lg">Define a new design concept for the commercial collection.</p>
+                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground uppercase">{editingProduct ? 'Refine Concept' : 'Initiate Drop'}</h2>
+                    <p className="text-muted-foreground font-medium italic text-lg">{editingProduct ? 'Recalibrate an existing design spec.' : 'Define a new design concept for the commercial collection.'}</p>
                   </div>
-                  <Button variant="ghost" className="rounded-full w-12 h-12 p-0" onClick={() => setIsAdding(false)}>
-                    <Trash2 className="w-6 h-6" />
+                  <Button variant="ghost" className="rounded-full w-12 h-12 p-0" onClick={() => { setIsAdding(false); setEditingProduct(null); }}>
+                    <Plus className="w-6 h-6 rotate-45" />
                   </Button>
                 </div>
 
-                <form onSubmit={handleAddProduct} className="grid lg:grid-cols-2 gap-12">
+                <form onSubmit={handleSaveProduct} className="grid lg:grid-cols-2 gap-12">
                   <div className="space-y-8">
                     <div className="space-y-3">
                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Design Identity</label>
-                      <Input name="name" className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-bold text-xl uppercase tracking-tight" required placeholder="Design Name" />
+                      <Input name="name" defaultValue={editingProduct?.name} className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-bold text-xl uppercase tracking-tight" required placeholder="Design Name" />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-8">
                       <div className="space-y-3">
                         <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Investment (Ksh)</label>
-                        <Input name="price" type="number" className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-bold text-xl" required placeholder="0.00" />
+                        <Input name="price" type="number" defaultValue={editingProduct?.price} className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-bold text-xl" required placeholder="0.00" />
                       </div>
                       <div className="space-y-3">
                         <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Category</label>
-                        <select name="category" className="w-full h-16 glass-panel rounded-lg border-black/5 px-8 font-bold text-[10px] uppercase tracking-widest outline-none bg-white/50">
+                        <select name="category" defaultValue={editingProduct?.category} className="w-full h-16 glass-panel rounded-lg border-black/5 px-8 font-bold text-[10px] uppercase tracking-widest outline-none bg-white/50">
                           <option value="FASHION">Fashion</option>
                           <option value="ACCESSORIES">Accessories</option>
                           <option value="PATTERNS">Patterns</option>
@@ -835,7 +1003,7 @@ export function Admin() {
                     </div>
 
                     <div className="flex items-center gap-4 p-4 bg-black/5 rounded-lg border border-black/5">
-                      <input type="checkbox" name="is_featured" id="feat" className="w-5 h-5 accent-secondary" />
+                      <input type="checkbox" name="is_featured" id="feat" defaultChecked={editingProduct?.is_featured} className="w-5 h-5 accent-secondary" />
                       <label htmlFor="feat" className="text-xs font-bold uppercase tracking-widest cursor-pointer">Curated Highlight (Homepage)</label>
                     </div>
                   </div>
@@ -846,6 +1014,7 @@ export function Admin() {
                         <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Visual Asset (Link)</label>
                         <Input 
                           name="image" 
+                          defaultValue={editingProduct?.image_url} 
                           className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-medium" 
                           placeholder="https://images.unsplash.com/..." 
                           disabled={isUploading}
@@ -876,6 +1045,7 @@ export function Admin() {
                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Artistic Statement</label>
                       <textarea 
                         name="description"
+                        defaultValue={editingProduct?.description}
                         className="w-full h-40 glass-panel rounded-lg border-black/5 p-8 outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/20 transition-all font-medium text-lg leading-relaxed text-foreground bg-white/50"
                         placeholder="Materiality, silhouette, and technique..."
                         disabled={isUploading}
@@ -889,10 +1059,10 @@ export function Admin() {
                       {isUploading ? (
                         <div className="flex items-center gap-3">
                           <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-                          Archiving Concept...
+                          {editingProduct ? 'Recalibrating...' : 'Archiving Concept...'}
                         </div>
                       ) : (
-                        'Publish Design'
+                        editingProduct ? 'Apply Refinements' : 'Publish Design'
                       )}
                     </Button>
                   </div>
@@ -914,23 +1084,29 @@ export function Admin() {
               <div className="glass-panel p-8 md:p-16 rounded-lg max-w-4xl w-full border-white/10 space-y-12 relative bg-white/90 shadow-2xl my-auto">
                 <div className="flex justify-between items-start">
                   <div className="space-y-4">
-                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground uppercase leading-none">Curate<br /><span className="text-secondary italic">Project</span></h2>
-                    <p className="text-muted-foreground font-medium italic text-lg">Document a high-couture milestone in the studio portfolio.</p>
+                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground uppercase leading-none">
+                      {editingPortfolioItem ? (
+                        <>Refine<br /><span className="text-secondary italic">Milestone</span></>
+                      ) : (
+                        <>Curate<br /><span className="text-secondary italic">Project</span></>
+                      )}
+                    </h2>
+                    <p className="text-muted-foreground font-medium italic text-lg">{editingPortfolioItem ? 'Recalibrate a documented studio achievement.' : 'Document a high-couture milestone in the studio portfolio.'}</p>
                   </div>
-                  <Button variant="ghost" className="rounded-full w-12 h-12 p-0" onClick={() => setIsAddingPortfolio(false)}>
-                    <Trash2 className="w-6 h-6" />
+                  <Button variant="ghost" className="rounded-full w-12 h-12 p-0" onClick={() => { setIsAddingPortfolio(false); setEditingPortfolioItem(null); }}>
+                    <Plus className="w-6 h-6 rotate-45" />
                   </Button>
                 </div>
 
-                <form onSubmit={handleAddPortfolio} className="grid lg:grid-cols-2 gap-12">
+                <form onSubmit={handleSavePortfolio} className="grid lg:grid-cols-2 gap-12">
                   <div className="space-y-8">
                     <div className="space-y-3">
                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Project Title</label>
-                      <Input name="title" className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-bold text-xl uppercase" required placeholder="e.g. The Solaris Shroud" />
+                      <Input name="title" defaultValue={editingPortfolioItem?.title} className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-bold text-xl uppercase" required placeholder="e.g. The Solaris Shroud" />
                     </div>
                     <div className="space-y-3">
                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Presentation Category</label>
-                      <Input name="category" className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-bold text-xs uppercase tracking-widest" required placeholder="RUNWAY / EXHIBITION / BESPOKE" />
+                      <Input name="category" defaultValue={editingPortfolioItem?.category} className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-bold text-xs uppercase tracking-widest" required placeholder="RUNWAY / EXHIBITION / BESPOKE" />
                     </div>
                   </div>
 
@@ -940,6 +1116,7 @@ export function Admin() {
                         <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Visual Documentation (Link)</label>
                         <Input 
                           name="image" 
+                          defaultValue={editingPortfolioItem?.image_url}
                           className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-medium" 
                           placeholder="URL to project image" 
                           disabled={isUploading}
@@ -970,6 +1147,7 @@ export function Admin() {
                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Project Narrative</label>
                       <textarea 
                         name="description"
+                        defaultValue={editingPortfolioItem?.description}
                         className="w-full h-40 glass-panel rounded-lg border-black/5 p-8 outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/20 transition-all font-medium text-lg leading-relaxed text-foreground bg-white/50"
                         placeholder="The concept, the technique, the journey..."
                         disabled={isUploading}
@@ -983,13 +1161,84 @@ export function Admin() {
                       {isUploading ? (
                         <div className="flex items-center gap-3">
                           <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-                          Calibrating...
+                          {editingPortfolioItem ? 'Recalibrating...' : 'Calibrating...'}
                         </div>
                       ) : (
-                        'Calibrate Portfolio'
+                        editingPortfolioItem ? 'Save Milestone' : 'Calibrate Portfolio'
                       )}
                     </Button>
                   </div>
+                </form>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Add/Edit Philosophy Modal */}
+        <AnimatePresence>
+          {isAddingPhilosophy && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-black/40 backdrop-blur-3xl overflow-y-auto"
+            >
+              <div className="glass-panel p-8 md:p-16 rounded-lg max-w-2xl w-full border-white/10 space-y-12 relative bg-white/90 shadow-2xl my-auto">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-4">
+                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground uppercase leading-none italic">
+                      {editingPhilosophy ? (
+                        <>Refine<br /><span className="text-secondary not-italic">Philosophy</span></>
+                      ) : (
+                        <>Document<br /><span className="text-secondary not-italic">Pillar</span></>
+                      )}
+                    </h2>
+                    <p className="text-muted-foreground font-medium italic text-lg">{editingPhilosophy ? 'Adjust the studio manifesto to reflect new craft paradigms.' : 'Define a new ethical or aesthetic pillar for the collective.'}</p>
+                  </div>
+                  <Button variant="ghost" className="rounded-full w-12 h-12 p-0" onClick={() => { setIsAddingPhilosophy(false); setEditingPhilosophy(null); }}>
+                    <Plus className="w-6 h-6 rotate-45" />
+                  </Button>
+                </div>
+
+                <form onSubmit={handleSavePhilosophy} className="space-y-8">
+                  <div className="grid grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Pillar Title</label>
+                      <Input name="title" defaultValue={editingPhilosophy?.title} className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-bold text-xl uppercase" required placeholder="e.g. SLOW PRODUCTION" />
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Icon Signature</label>
+                      <select name="icon_name" defaultValue={editingPhilosophy?.icon_name || 'Sparkles'} className="w-full glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-bold text-[10px] tracking-widest uppercase appearance-none bg-white/50">
+                        <option value="Sparkles">Sparkles (Visionary)</option>
+                        <option value="Scissors">Scissors (Technique)</option>
+                        <option value="Leaf">Leaf (Sustainable)</option>
+                        <option value="Factory">Factory (Materials)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Visual Anchor (Image URL)</label>
+                    <Input name="image_url" defaultValue={editingPhilosophy?.image_url} className="glass-panel h-16 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 px-8 font-medium" placeholder="Optional background image URL" />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Manifesto Content</label>
+                    <textarea 
+                      name="content"
+                      defaultValue={editingPhilosophy?.content}
+                      className="w-full h-40 glass-panel rounded-lg border-black/5 p-8 outline-none focus:border-secondary/40 focus:ring-2 focus:ring-secondary/20 transition-all font-medium text-lg leading-relaxed text-foreground bg-white/50"
+                      placeholder="Articulate the core value..."
+                      required
+                    />
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    className="w-full rounded-full bg-black text-white h-20 font-bold uppercase text-lg tracking-widest"
+                  >
+                    {editingPhilosophy ? 'Confirm Refinements' : 'Seal Pillar'}
+                  </Button>
                 </form>
               </div>
             </motion.div>
