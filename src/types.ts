@@ -8,7 +8,7 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  currency: string; // 'Ksh'
+  currency?: string; // 'Ksh'
   category: 'FASHION' | 'ACCESSORIES' | 'PATTERNS';
   image_urls: string[];
   created_at: string;

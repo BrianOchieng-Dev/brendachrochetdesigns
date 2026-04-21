@@ -160,7 +160,6 @@ export function Admin() {
     const product = {
       name: formData.get('name') as string,
       price: Number(formData.get('price')),
-      currency: 'Ksh',
       image_url: formData.get('image') as string,
       description: formData.get('description') as string,
       category: formData.get('category') as any,
