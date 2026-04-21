@@ -112,6 +112,7 @@ export function BabylonCrochetViewer() {
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      scene.dispose();
       engine.dispose();
     };
   }, []);
