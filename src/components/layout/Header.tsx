@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
+import { supabase, isConfigured } from '@/lib/supabase';
 
 const navLinks = [
   { name: 'Home', path: '/' },

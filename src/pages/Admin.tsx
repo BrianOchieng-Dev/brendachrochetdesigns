@@ -739,16 +739,7 @@ export function Admin() {
               </Card>
             </AuthGate>
 
-             <AuthGate authority="DISPUTE_ARBITRATOR">
-              <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
-                <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
-                  <MessageSquare className="w-8 h-8 text-secondary" />
-                </div>
-                <h3 className="text-2xl font-bold uppercase tracking-tight">Dispute Arbitrator</h3>
-                <p className="text-sm text-muted-foreground font-medium italic">Audit Artisan-Customer communication logs for resolution.</p>
-                <Button variant="ghost" className="w-full rounded-full border border-black/5 font-bold uppercase text-[10px] tracking-widest h-12">View History</Button>
-              </Card>
-            </AuthGate>
+
 
             <AuthGate authority="ACCOUNT_OVERSIGHT">
               <Card className="lg:col-span-3 glass-panel border-black/5 rounded-lg overflow-hidden">
