@@ -5,6 +5,8 @@ import { Toaster } from '@/components/ui/sonner';
 import { useState, useEffect, ReactNode, lazy, Suspense } from 'react';
 import { PageLoader } from '@/components/ui/loaders';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { CartProvider } from '@/contexts/CartContext';
+import { CartDrawer } from '@/components/cart/CartDrawer';
 import { Home } from '@/pages/Home';
 
 // Lazy load other pages
@@ -49,50 +51,53 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <Router>
-        <div className="min-h-screen mesh-gradient selection:bg-white/20 relative">
-          <Header />
-          <main>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/portfolio" element={<Portfolio />} />
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/sustainability" element={<Sustainability />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route 
-                  path="/wishlist" 
-                  element={
-                    <ProtectedRoute>
-                      <Wishlist />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/profile" 
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin" 
-                  element={
-                    <AdminRoute>
-                      <Admin />
-                    </AdminRoute>
-                  } 
-                />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Suspense>
-          </main>
-          <Footer />
-          <Toaster theme="light" position="bottom-right" />
-        </div>
-      </Router>
+      <CartProvider>
+        <Router>
+          <div className="min-h-screen mesh-gradient selection:bg-white/20 relative">
+            <Header />
+            <main>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/portfolio" element={<Portfolio />} />
+                  <Route path="/shop" element={<Shop />} />
+                  <Route path="/product/:id" element={<ProductDetail />} />
+                  <Route path="/sustainability" element={<Sustainability />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route 
+                    path="/wishlist" 
+                    element={
+                      <ProtectedRoute>
+                        <Wishlist />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/profile" 
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/admin" 
+                    element={
+                      <AdminRoute>
+                        <Admin />
+                      </AdminRoute>
+                    } 
+                  />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Suspense>
+            </main>
+            <Footer />
+            <CartDrawer />
+            <Toaster theme="light" position="bottom-right" />
+          </div>
+        </Router>
+      </CartProvider>
     </AuthProvider>
   );
 }

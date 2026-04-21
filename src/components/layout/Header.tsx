@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 
 const navLinks = [
@@ -19,6 +20,7 @@ export function Header() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const { user, signOut, isAdmin } = useAuth();
+  const { totalItems, setIsCartOpen } = useCart();
 
   const handleSignOut = async () => {
     try {
@@ -74,8 +76,18 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2 md:gap-4">
-          <Button variant="ghost" size="icon" className="rounded-full hover:bg-black/5 text-foreground hidden md:flex">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setIsCartOpen(true)}
+            className="rounded-full hover:bg-black/5 text-foreground relative"
+          >
             <ShoppingBag className="w-5 h-5" />
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 bg-secondary text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-in zoom-in duration-300">
+                {totalItems}
+              </span>
+            )}
           </Button>
           
           <AnimatePresence mode="wait">
@@ -149,7 +161,23 @@ export function Header() {
               <Menu className="w-5 h-5" />
             </SheetTrigger>
             <SheetContent side="right" className="glass-panel border-l-black/5 text-foreground">
-              <div className="flex flex-col gap-8 mt-12">
+              <div className="flex flex-col gap-8 mt-12 pb-20">
+                <Button 
+                  variant="ghost"
+                  onClick={() => {
+                    setIsCartOpen(true);
+                    setIsOpen(false);
+                  }}
+                  className="text-3xl font-bold uppercase tracking-tighter flex items-center justify-start gap-4 hover:text-secondary p-0 h-auto"
+                >
+                  <ShoppingBag className="w-8 h-8" /> 
+                  Your Cart
+                  {totalItems > 0 && (
+                    <span className="bg-secondary text-white text-xs px-3 py-1 rounded-full ml-auto">
+                      {totalItems}
+                    </span>
+                  )}
+                </Button>
                 {navLinks.map((link) => (
                   <Link 
                     key={link.path} 

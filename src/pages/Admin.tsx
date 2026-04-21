@@ -681,6 +681,7 @@ export function Admin() {
                           <option value="FASHION">Fashion</option>
                           <option value="ACCESSORIES">Accessories</option>
                           <option value="PATTERNS">Patterns</option>
+                          <option value="EXCLUSIVES">Exclusives</option>
                         </select>
                       </div>
                     </div>

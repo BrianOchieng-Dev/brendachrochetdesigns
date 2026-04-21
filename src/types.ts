@@ -9,7 +9,7 @@ export interface Product {
   description: string;
   price: number;
   currency?: string; // 'Ksh'
-  category: 'FASHION' | 'ACCESSORIES' | 'PATTERNS';
+  category: 'FASHION' | 'ACCESSORIES' | 'PATTERNS' | 'EXCLUSIVES';
   image_urls?: string[];
   image_url?: string;
   created_at: string;

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Product } from '@/types';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 
 export function ProductDetail() {
@@ -12,6 +13,7 @@ export function ProductDetail() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     async function fetchProduct() {
@@ -69,7 +71,10 @@ export function ProductDetail() {
           <h1 className="text-4xl font-bold uppercase">{product.name}</h1>
           <p className="text-2xl text-secondary">Ksh {Number(product.price).toLocaleString()}</p>
           <p className="text-muted-foreground">{product.description}</p>
-          <Button className="w-full rounded-full bg-secondary text-secondary-foreground h-14 font-bold">
+          <Button 
+            onClick={() => addToCart(product)}
+            className="w-full rounded-full bg-secondary text-secondary-foreground h-14 font-bold"
+          >
             <ShoppingBag className="w-5 h-5 mr-3" /> Add to Cart
           </Button>
           <Link to="/shop" className="block text-center text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">

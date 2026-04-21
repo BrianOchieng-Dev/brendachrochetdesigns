@@ -76,8 +76,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const role: UserRole = (user?.user_metadata?.role as UserRole) || 
-                       (user?.email === 'crochetbrenda@gmail.com' ? 'ADMIN' : 
+  const role: UserRole = user?.email === 'crochetbrenda@gmail.com' ? 'ADMIN' : 
+                       ((user?.user_metadata?.role as UserRole) || 
                        (user ? 'COLLECTOR' : 'GUEST'));
   const authorities: AdminAuthority[] = (user?.user_metadata?.authorities as AdminAuthority[]) || [];
   

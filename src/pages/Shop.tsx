@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { Crown, ShoppingBag, Search, Filter, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ export function Shop() {
   const { user, isMuse } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
   const [filter, setFilter] = useState<typeof CATEGORIES[number]>('ALL');
   const [search, setSearch] = useState('');
 
@@ -103,11 +105,15 @@ export function Shop() {
 
   const filteredProducts = useMemo(() => {
     let result = products.filter(p => {
-      // Only Muses see "Exclusives" (simulated by looking at price/description or specific tag)
-      const isExclusive = p.name.includes('Primal') || p.description.includes('Exclusive');
+      const isExclusive = p.category === 'EXCLUSIVES' || 
+                         p.name.includes('Primal') || 
+                         p.description.includes('Exclusive');
+      
       if (isExclusive && !isMuse) return false;
       
-      const matchesFilter = filter === 'ALL' || p.category === filter || (filter === 'EXCLUSIVES' && isExclusive);
+      const matchesFilter = filter === 'ALL' || 
+                           p.category === filter || 
+                           (filter === 'EXCLUSIVES' && isExclusive);
       const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
       return matchesFilter && matchesSearch;
     });
@@ -214,7 +220,10 @@ export function Shop() {
                     </div>
                     <p className="text-muted-foreground text-sm md:text-base font-medium line-clamp-2 leading-relaxed">{product.description}</p>
                   </div>
-                  <Button className="w-full rounded-full border border-secondary/30 glass-interactive hover:bg-secondary text-secondary hover:text-white gap-3 h-14 md:h-16 font-bold text-lg md:text-xl group shadow-sm hover:shadow-secondary/20 transition-all">
+                  <Button 
+                    onClick={() => addToCart(product)}
+                    className="w-full rounded-full border border-secondary/30 glass-interactive hover:bg-secondary text-secondary hover:text-white gap-3 h-14 md:h-16 font-bold text-lg md:text-xl group shadow-sm hover:shadow-secondary/20 transition-all"
+                  >
                     <ShoppingBag className="w-5 h-5 transition-transform group-hover:scale-110" /> Add to Cart
                   </Button>
                 </div>
