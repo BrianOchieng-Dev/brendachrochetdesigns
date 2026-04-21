@@ -69,6 +69,8 @@ export function Admin() {
   const [velocity, setVelocity] = useState(data);
   const [isAdding, setIsAdding] = useState(false);
   const [isAddingPortfolio, setIsAddingPortfolio] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingPortfolioItem, setEditingPortfolioItem] = useState<PortfolioItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState('DASHBOARD');
@@ -189,7 +191,12 @@ export function Admin() {
     }
   }
 
-  async function handleAddProduct(e: React.FormEvent) {
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  async function handleSaveProduct(e: React.FormEvent) {
     if (!isConfigured) return;
     e.preventDefault();
 
@@ -198,11 +205,11 @@ export function Admin() {
     const fileInput = (e.target as HTMLFormElement).querySelector('input[type="file"]') as HTMLInputElement;
     const file = fileInput?.files?.[0];
 
-    let finalImageUrl = imageLink;
+    let finalImageUrl = imageLink || (editingProduct?.image_url);
 
     try {
+      setIsUploading(true);
       if (file) {
-        setIsUploading(true);
         // Size validation (2MB)
         if (file.size > 2 * 1024 * 1024) {
           throw new Error('Asset exceeds 2MB limit. Please curate a smaller version.');
@@ -223,11 +230,14 @@ export function Admin() {
           .getPublicUrl(filePath);
         
         finalImageUrl = publicUrl;
+
+        // If we were editing and had a previous local image, we might want to delete it
+        // For simplicity, we just upload the new one.
       }
 
       if (!finalImageUrl) throw new Error('A visual asset (link or file) is required.');
 
-      const product = {
+      const productData = {
         name: formData.get('name') as string,
         price: Number(formData.get('price')),
         image_url: finalImageUrl,
@@ -236,21 +246,55 @@ export function Admin() {
         is_featured: formData.get('is_featured') === 'on'
       };
       
-      const { error } = await supabase.from('products').insert([product]);
-      if (error) throw error;
+      if (editingProduct) {
+        const { error } = await supabase
+          .from('products')
+          .update(productData)
+          .eq('id', editingProduct.id);
+        if (error) throw error;
+        toast.success('Design concept recalibrated in the ledger.');
+      } else {
+        const { error } = await supabase.from('products').insert([productData]);
+        if (error) throw error;
+        toast.success('Concept archived in the studio ledger.');
+      }
 
-      toast.success('Concept archived in the studio ledger.');
       setIsAdding(false);
+      setEditingProduct(null);
       fetchAllData();
     } catch (error: any) {
-      console.error('handleAddProduct Error:', error);
+      console.error('handleSaveProduct Error:', error);
       toast.error('Sync failed: ' + (error.message || 'Unknown error'));
     } finally {
       setIsUploading(false);
     }
   }
 
-  async function handleAddPortfolio(e: React.FormEvent) {
+  async function handleDeleteProduct(id: string, imageUrl: string) {
+    if (!isConfigured) return;
+    if (!confirm('Are you certain you wish to permanently remove this design concept? This cannot be undone.')) return;
+
+    try {
+      // 1. Delete from DB
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) throw error;
+
+      // 2. Delete from Storage if it's a local file
+      if (imageUrl.includes('storage.googleapis.com') || imageUrl.includes('supabase.co')) {
+        const path = imageUrl.split('/').pop();
+        if (path) {
+          await supabase.storage.from('products').remove([`products/${path}`]);
+        }
+      }
+
+      toast.success('Design concept purged from the ledger.');
+      fetchAllData();
+    } catch (error: any) {
+      toast.error('Purge failed: ' + error.message);
+    }
+  }
+
+  async function handleSavePortfolio(e: React.FormEvent) {
     if (!isConfigured) return;
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
@@ -258,11 +302,11 @@ export function Admin() {
     const fileInput = (e.target as HTMLFormElement).querySelector('input[type="file"]') as HTMLInputElement;
     const file = fileInput?.files?.[0];
 
-    let finalImageUrl = imageLink;
+    let finalImageUrl = imageLink || (editingPortfolioItem?.image_url);
     
     try {
+      setIsUploading(true);
       if (file) {
-        setIsUploading(true);
         if (file.size > 2 * 1024 * 1024) {
           throw new Error('Asset exceeds 2MB limit.');
         }
@@ -286,18 +330,57 @@ export function Admin() {
 
       if (!finalImageUrl) throw new Error('Asset required.');
 
-      const item = {
+      const itemData = {
         title: formData.get('title') as string,
         category: formData.get('category') as string,
         image_url: finalImageUrl,
         description: formData.get('description') as string,
       };
       
-      const { error } = await supabase.from('portfolio').insert([item]);
-      if (error) throw error;
-      toast.success('Portfolio calibrated with new work.');
+      if (editingPortfolioItem) {
+        const { error } = await supabase
+          .from('portfolio')
+          .update(itemData)
+          .eq('id', editingPortfolioItem.id);
+        if (error) throw error;
+        toast.success('Portfolio project recalibrated.');
+      } else {
+        const { error } = await supabase.from('portfolio').insert([itemData]);
+        if (error) throw error;
+        toast.success('Portfolio calibrated with new work.');
+      }
+
       setIsAddingPortfolio(false);
+      setEditingPortfolioItem(null);
       fetchAllData();
+    } catch (error: any) {
+      toast.error('Sync failed: ' + error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  async function handleDeletePortfolio(id: string, imageUrl: string) {
+    if (!isConfigured) return;
+    if (!confirm('Are you certain you wish to purge this milestone from the portfolio?')) return;
+
+    try {
+      const { error } = await supabase.from('portfolio').delete().eq('id', id);
+      if (error) throw error;
+
+      if (imageUrl.includes('supabase.co')) {
+        const path = imageUrl.split('/').pop();
+        if (path) {
+          await supabase.storage.from('portfolio').remove([`portfolio/${path}`]);
+        }
+      }
+
+      toast.success('Portfolio milestone removed.');
+      fetchAllData();
+    } catch (error: any) {
+      toast.error('Deletion failed: ' + error.message);
+    }
+  }
     } catch (error: any) {
       toast.error('Sync failed: ' + error.message);
     } finally {
