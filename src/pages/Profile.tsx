@@ -38,6 +38,7 @@ export function Profile() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [orderCount, setOrderCount] = useState(0);
   const [savedCount, setSavedCount] = useState(0);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [measurements, setMeasurements] = useState(user?.user_metadata?.measurements || {
     chest: '92',
     arm: '64',
@@ -48,7 +49,56 @@ export function Profile() {
 
   useEffect(() => {
     fetchProfileStats();
+    fetchNotifications();
   }, [user]);
+
+  async function fetchNotifications() {
+    if (!user || !isConfigured) return;
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setNotifications(data || []);
+    } catch (error: any) {
+      console.error('Failed to fetch notifications:', error);
+    }
+  }
+
+  async function markAsRead(id: string) {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', id);
+      if (error) throw error;
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+    } catch (error: any) {
+      toast.error('Failed to clear notification');
+    }
+  }
+
+  async function clearAllNotifications() {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', user?.id)
+        .eq('is_read', false);
+      if (error) throw error;
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      toast.success('Digital Pulse cleared.');
+    } catch (error: any) {
+      toast.error('Failed to clear feed');
+    }
+  }
 
   async function fetchProfileStats() {
     if (!user || !isConfigured) return;
@@ -264,10 +314,32 @@ export function Profile() {
                   <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
                     <Bell className="w-6 h-6 text-secondary" /> Digital Pulse
                   </CardTitle>
-                  <Button variant="link" className="text-xs font-bold uppercase text-secondary">Clear All</Button>
+                  {notifications.some(n => !n.is_read) && (
+                    <Button variant="link" onClick={clearAllNotifications} className="text-xs font-bold uppercase text-secondary">Clear All</Button>
+                  )}
                 </CardHeader>
                 <div className="space-y-6">
-                  <p className="text-muted-foreground text-sm italic">No notifications yet.</p>
+                  {notifications.length === 0 ? (
+                    <p className="text-muted-foreground text-sm italic py-10 text-center">No studio alerts in the last 30 days.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {notifications.map((notif) => (
+                        <div 
+                          key={notif.id} 
+                          onClick={() => !notif.is_read && markAsRead(notif.id)}
+                          className={`p-6 rounded-lg border transition-all cursor-pointer relative group ${notif.is_read ? 'bg-black/5 border-transparent opacity-60' : 'bg-secondary/5 border-secondary/20 shadow-sm'}`}
+                        >
+                          {!notif.is_read && <span className="absolute top-4 right-4 w-2 h-2 bg-secondary rounded-full animate-pulse" />}
+                          <p className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] mb-1">{notif.type}</p>
+                          <h4 className="font-bold text-lg leading-tight mb-2 uppercase tracking-tight">{notif.title}</h4>
+                          <p className="text-sm font-medium italic text-muted-foreground leading-relaxed">"{notif.message}"</p>
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase mt-4 opacity-40">
+                            {new Date(notif.created_at).toLocaleDateString()} /// {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </Card>
 

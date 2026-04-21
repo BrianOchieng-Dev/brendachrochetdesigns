@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { ShoppingBag, User, Menu, Scissors, LogOut, LayoutDashboard, Heart } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,6 +21,39 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, signOut, isAdmin } = useAuth();
   const { totalItems, setIsCartOpen } = useCart();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user || !isConfigured) return;
+    
+    const fetchUnreadCount = async () => {
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false);
+      setUnreadCount(count || 0);
+    };
+
+    fetchUnreadCount();
+
+    // Subscribe to notification changes
+    const channel = supabase
+      .channel('unread-notifications')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`
+      }, () => {
+        fetchUnreadCount();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const handleSignOut = async () => {
     try {
@@ -116,12 +149,15 @@ export function Header() {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className={`rounded-full overflow-hidden hover:bg-black/5 ${location.pathname === '/profile' ? 'text-secondary bg-black/5' : 'text-foreground'}`}
+                    className={`rounded-full overflow-hidden hover:bg-black/5 relative ${location.pathname === '/profile' ? 'text-secondary bg-black/5' : 'text-foreground'}`}
                   >
                     {user?.user_metadata?.avatar_url ? (
                       <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" alt="Profile" />
                     ) : (
                       <User className="w-5 h-5" />
+                    )}
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-secondary rounded-full border-2 border-background animate-pulse" />
                     )}
                   </Button>
                 </Link>

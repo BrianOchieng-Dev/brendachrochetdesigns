@@ -850,14 +850,47 @@ export function Admin() {
                             </div>
                           )}
                         </div>
-                        <div className="md:col-span-1 flex justify-end">
+                        <div className="md:col-span-1 flex flex-col justify-end gap-3">
                           {inquiry.status === 'PENDING' && (
-                            <Button 
-                              onClick={() => handleResolveInquiry(inquiry.id)}
-                              className="rounded-full bg-black text-white px-8 h-12 font-bold uppercase text-[10px] tracking-widest"
-                            >
-                              Dispatch Response
-                            </Button>
+                            <>
+                              {respondingToInquiry === inquiry.id ? (
+                                <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                                  <Textarea 
+                                    placeholder="Draft your response..." 
+                                    value={adminResponse}
+                                    onChange={(e) => setAdminResponse(e.target.value)}
+                                    className="glass-panel border-black/5 min-h-[100px] text-xs font-medium italic"
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button 
+                                      size="sm"
+                                      onClick={() => handleResolveInquiry(inquiry.id, (inquiry as any).customer_id)}
+                                      className="flex-1 rounded-full bg-secondary text-white font-bold uppercase text-[9px] tracking-widest h-10"
+                                    >
+                                      Dispatch
+                                    </Button>
+                                    <Button 
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setRespondingToInquiry(null);
+                                        setAdminResponse('');
+                                      }}
+                                      className="rounded-full border border-black/5 h-10 px-4 font-bold uppercase text-[9px] tracking-widest text-muted-foreground"
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <Button 
+                                  onClick={() => setRespondingToInquiry(inquiry.id)}
+                                  className="rounded-full bg-black text-white px-8 h-12 font-bold uppercase text-[10px] tracking-widest"
+                                >
+                                  Compose Response
+                                </Button>
+                              )}
+                            </>
                           )}
                         </div>
                       </div>
@@ -1189,7 +1222,6 @@ export function Admin() {
                           <option value="FASHION">Fashion</option>
                           <option value="ACCESSORIES">Accessories</option>
                           <option value="PATTERNS">Patterns</option>
-                          <option value="EXCLUSIVES">Exclusives</option>
                         </select>
                       </div>
                     </div>
