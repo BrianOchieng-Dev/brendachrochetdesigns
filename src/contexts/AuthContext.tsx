@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 
-export type UserRole = 'GUEST' | 'COLLECTOR' | 'MUSE' | 'ADMIN';
+export type UserRole = 'GUEST' | 'COLLECTOR' | 'MUSE' | 'VIP' | 'ADMIN';
 
 export type AdminAuthority = 
   | 'TIER_AUTHORITY' 
@@ -23,6 +23,7 @@ interface AuthContextType {
   role: UserRole;
   authorities: AdminAuthority[];
   isMuse: boolean;
+  isVIP: boolean;
   isCollector: boolean;
   isAdmin: boolean;
   hasAuthority: (authority: AdminAuthority) => boolean;
@@ -75,12 +76,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const role: UserRole = (user?.user_metadata?.role as UserRole) || (user ? 'COLLECTOR' : 'GUEST');
+  const role: UserRole = (user?.user_metadata?.role as UserRole) || 
+                       (user?.email === 'crochetbrenda@gmail.com' ? 'ADMIN' : 
+                       (user ? 'COLLECTOR' : 'GUEST'));
   const authorities: AdminAuthority[] = (user?.user_metadata?.authorities as AdminAuthority[]) || [];
   
   const isAdmin = role === 'ADMIN';
-  const isMuse = role === 'MUSE' || isAdmin;
-  const isCollector = role === 'COLLECTOR' || role === 'MUSE' || isAdmin;
+  const isVIP = role === 'VIP' || isAdmin;
+  const isMuse = role === 'MUSE' || isVIP;
+  const isCollector = role === 'COLLECTOR' || isMuse;
 
   const hasAuthority = (authority: AdminAuthority) => {
     if (isAdmin) return true; // Admins have full access
@@ -95,6 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       role, 
       authorities,
       isMuse, 
+      isVIP,
       isCollector, 
       isAdmin,
       hasAuthority,

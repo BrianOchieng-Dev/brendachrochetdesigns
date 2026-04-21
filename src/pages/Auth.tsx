@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Mail, Lock, User, ArrowRight, Loader2, Scissors } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Loader2, Scissors, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/lib/supabase';
@@ -15,22 +15,35 @@ export function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
+  const isPasswordValid = password.length >= 8;
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
+    if (!isLogin && !isPasswordValid) {
+      toast.error('The secret sequence must be at least 8 characters long.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       if (isLogin) {
         const loginEmail = email;
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: { user }, error } = await supabase.auth.signInWithPassword({
           email: loginEmail,
           password,
         });
         if (error) throw error;
-        toast.success(`Welcome back to the studio.`);
+
+        // Note: Strict email verification check removed to allow immediate testing as requested.
+        // In production, you can re-enable this to enforce verified studio access.
+
+        toast.success('Access granted. Welcome back to the studio.');
         navigate('/profile');
       } else {
         const { error } = await supabase.auth.signUp({
@@ -44,7 +57,7 @@ export function Auth() {
           },
         });
         if (error) throw error;
-        toast.success('Welcome to the collective. Please verify your email.');
+        toast.success('Welcome to the collective. Your journey begins once you verify your email.');
       }
     } catch (error: any) {
       if (error.message?.includes('Failed to fetch')) {
@@ -129,15 +142,26 @@ export function Auth() {
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input 
-                  type="password" 
+                  type={showPassword ? "text" : "password"} 
                   placeholder="••••••••" 
-                  className="pl-12 glass-panel h-14 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 font-medium text-foreground bg-white/20"
+                  className={`pl-12 pr-12 glass-panel h-14 rounded-lg border-black/5 focus:border-secondary/40 focus:ring-secondary/20 font-medium text-foreground bg-white/20 ${!isLogin && password && !isPasswordValid ? 'border-red-500/50' : ''}`}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required 
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-secondary transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
+              {!isLogin && password && !isPasswordValid && (
+                <p className="text-[10px] text-red-500 font-bold uppercase tracking-tighter ml-2">Sequence must be at least 8 characters</p>
+              )}
             </div>
+
 
             <Button 
               type="submit" 

@@ -30,7 +30,7 @@ import { supabase, isConfigured } from '@/lib/supabase';
 
 
 export function Profile() {
-  const { user, role, isMuse, isCollector } = useAuth();
+  const { user, role, isMuse, isVIP, isCollector } = useAuth();
   const [activeTab, setActiveTab] = useState('OVERVIEW');
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '');
   const [isEditing, setIsEditing] = useState(false);
@@ -141,36 +141,10 @@ export function Profile() {
     fileInputRef.current?.click();
   };
 
-  const handleSimulateMuse = async () => {
-    try {
-      const newRole = role === 'MUSE' ? 'COLLECTOR' : 'MUSE';
-
-      const { error } = await supabase.auth.updateUser({
-        data: { role: newRole }
-      });
-      if (error) throw error;
-      toast.success(`Role updated to: ${newRole}. Refreshing state...`);
-      // Local reload to trigger AuthContext refresh
-      window.location.reload();
-    } catch (error: any) {
-      toast.error('Update failed: ' + error.message);
-    }
-  };
 
   return (
     <div className="pt-32 pb-20 px-6 bg-background min-h-screen">
       <div className="max-w-6xl mx-auto space-y-12">
-        {/* Role Simulation Helper (Debug Only) */}
-        <div className="flex justify-end">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleSimulateMuse}
-            className="rounded-full border-secondary/20 text-secondary hover:bg-secondary/5 text-[10px] font-bold uppercase tracking-widest"
-          >
-            {role === 'MUSE' ? 'Downgrade to Collector' : 'Simulate Muse Status (VIP Test)'}
-          </Button>
-        </div>
 
         {/* Profile Header */}
         <section className="relative glass-card rounded-lg p-8 md:p-12 overflow-hidden">
@@ -201,7 +175,7 @@ export function Profile() {
                 </div>
               </div>
               <div className="absolute -bottom-2 -right-2 p-2 bg-secondary rounded-full border-4 border-background text-white shadow-lg">
-                {isMuse ? <Crown className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
+                {isVIP ? <Crown className="w-5 h-5" /> : isMuse ? <Crown className="w-5 h-5 opacity-70" /> : <Sparkles className="w-5 h-5" />}
               </div>
             </div>
 
@@ -305,20 +279,31 @@ export function Profile() {
                   <Crown className="w-5 h-5 text-secondary" /> Brand Status
                 </CardTitle>
                 <div className="space-y-6">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                      <span>Progress to Muse</span>
-                      <span>420 / 1000 pts</span>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                        <span>Muse Qualification</span>
+                        <span className={orderCount >= 1 ? 'text-green-500' : ''}>{orderCount >= 1 ? 'Buyer Verified' : 'Purchase Required'}</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-black/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-secondary w-full opacity-30" />
+                      </div>
+                      <p className="text-[9px] text-muted-foreground italic">Requirement: 4 months active + 1 purchase</p>
                     </div>
-                    <div className="h-2 w-full bg-black/5 rounded-full overflow-hidden">
-                      <div className="h-full bg-secondary w-[42%] rounded-full" />
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                        <span>VIP Calibration</span>
+                        <span className={orderCount >= 3 ? 'text-green-500' : ''}>{orderCount >= 3 ? 'Elite Verified' : '3 Purchases Required'}</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-black/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-secondary w-full opacity-10" />
+                      </div>
+                      <p className="text-[9px] text-muted-foreground italic">Requirement: 8 months active + 3 purchases</p>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground italic font-medium leading-relaxed">
-                    Earn Muse status by collecting 3 pieces or attending an exhibition.
-                  </p>
-                  <Button className="w-full rounded-full bg-black text-white h-12 text-xs font-bold uppercase tracking-[0.2em] hover:bg-black/90">
-                    How to level up
+                  <Button variant="outline" className="w-full rounded-full border-black/10 h-12 text-xs font-bold uppercase tracking-[0.2em] hover:bg-black/5" onClick={() => toast.info('Status is evaluated monthly by the Studio Maestro.')}>
+                    Status Governance
                   </Button>
                 </div>
               </Card>
@@ -329,11 +314,20 @@ export function Profile() {
                     <Lock className="w-8 h-8 text-secondary" />
                   </div>
                   <div className="space-y-2">
-                    <h4 className="font-bold uppercase tracking-widest">Early Access Locked</h4>
-                    <p className="text-sm text-muted-foreground font-medium italic">Available for "Muse" level collectors only.</p>
+                    <h4 className="font-bold uppercase tracking-widest">{isVIP ? 'VIP Access Unlocked' : isMuse ? 'Muse Access Unlocked' : 'Privileged Access'}</h4>
+                    <p className="text-sm text-muted-foreground font-medium italic">
+                      {isVIP ? 'You hold the highest tier in our collective.' : 
+                       isMuse ? 'Your journey to VIP continues at 8 months.' : 
+                       'Available for "Muse" and "VIP" level collectors.'}
+                    </p>
                   </div>
-                  <Button variant="outline" className="w-full rounded-full border-black/10 glass-panel h-11 text-xs font-bold uppercase tracking-widest">
-                    Request Upgrade
+                  <Button 
+                    variant="outline" 
+                    disabled={isVIP}
+                    onClick={() => toast.success('Your status review request has been sent to the Maestro.') }
+                    className="w-full rounded-full border-black/10 glass-panel h-11 text-xs font-bold uppercase tracking-widest"
+                  >
+                    {isVIP ? 'Top Tier Achieved' : 'Request Status Review'}
                   </Button>
                 </Card>
               )}

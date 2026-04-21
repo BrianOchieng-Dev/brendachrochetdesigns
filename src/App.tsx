@@ -26,6 +26,16 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+function AdminRoute({ children }: { children: ReactNode }) {
+  const { user, isAdmin, isLoading } = useAuth();
+
+  if (isLoading) return <PageLoader />;
+  if (!user) return <Navigate to="/auth" replace />;
+  if (!isAdmin) return <Navigate to="/shop" replace />;
+
+  return <>{children}</>;
+}
+
 export default function App() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -70,9 +80,9 @@ export default function App() {
                 <Route 
                   path="/admin" 
                   element={
-                    <ProtectedRoute>
+                    <AdminRoute>
                       <Admin />
-                    </ProtectedRoute>
+                    </AdminRoute>
                   } 
                 />
                 <Route path="*" element={<Navigate to="/" replace />} />

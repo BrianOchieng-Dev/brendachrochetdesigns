@@ -138,16 +138,26 @@ export function Admin() {
         setStats(prev => ({ ...prev, revenue: `Ksh ${total.toLocaleString()}`, commissions: inProgress.toString() }));
       }
 
-      // 3. Fetch Personnel
+      // 3. Fetch Personnel with metrics
       const { data: profilesData } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+      const { data: ordersDataForUsers } = await supabase.from('orders').select('customer_id');
+      
       if (profilesData) {
-        setPersonnel(profilesData.map(p => ({
-          id: p.id,
-          name: p.full_name || 'Anonymous',
-          email: p.id, 
-          role: p.role,
-          status: 'ACTIVE'
-        })));
+        setPersonnel(profilesData.map(p => {
+          const userOrders = ordersDataForUsers?.filter(o => o.customer_id === p.id) || [];
+          const monthsActive = Math.floor((Date.now() - new Date(p.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30.44));
+          
+          return {
+            id: p.id,
+            name: p.full_name || 'Anonymous',
+            email: p.id, 
+            role: p.role,
+            createdAt: p.created_at,
+            orderCount: userOrders.length,
+            monthsActive,
+            status: 'ACTIVE'
+          };
+        }));
         setStats(prev => ({ ...prev, collectors: profilesData.length.toString() }));
       }
 
@@ -252,9 +262,18 @@ export function Admin() {
 
   async function handlePromote(personId: string, currentRole: string) {
     if (!isConfigured) return;
-    const roles: UserRole[] = ['GUEST', 'COLLECTOR', 'MUSE', 'ADMIN'];
+    const roles: UserRole[] = ['COLLECTOR', 'MUSE', 'VIP'];
     const currentIndex = roles.indexOf(currentRole as UserRole);
-    const nextRole = roles[(currentIndex + 1) % roles.length];
+    
+    if (currentIndex === -1 && currentRole !== 'ADMIN') {
+      // Default to Collector if unknown and not Admin
+      var nextRole: UserRole = 'COLLECTOR';
+    } else if (currentRole === 'VIP' || currentRole === 'ADMIN') {
+      toast.info('This user has already reached the maximum tier or is an Admin.');
+      return;
+    } else {
+      var nextRole: UserRole = roles[currentIndex + 1];
+    }
 
     try {
       const { error } = await supabase.from('profiles').update({ role: nextRole }).eq('id', personId);
@@ -466,26 +485,33 @@ export function Admin() {
                              <p className="text-sm font-medium text-muted-foreground italic max-w-[200px] truncate">{person.email}</p>
                            </div>
                         </div>
-                        <div className="flex items-center gap-10">
-                           <div className="text-right">
-                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Assigned Role</p>
-                             <Badge className={`${person.role === 'ADMIN' ? 'bg-black text-white shadow-[0_0_15px_rgba(0,0,0,0.2)]' : 'bg-secondary/10 text-secondary'} font-bold px-4 py-1 rounded-full uppercase tracking-tighter`}>
-                               {person.role === 'ADMIN' ? 'The Maestro' : 
-                                person.role === 'MUSE' ? 'The Muse' :
-                                person.role === 'COLLECTOR' ? 'The Collector' : 'The Guest'}
-                             </Badge>
-                           </div>
-                           <div className="flex gap-3 h-10">
-                              <Button variant="ghost" className="rounded-lg border border-black/5 px-4 font-bold text-[10px] uppercase hover:bg-black/5 transition-all">Audit</Button>
-                              <Button 
-                                variant="ghost" 
-                                onClick={() => handlePromote(person.id, person.role)}
-                                className="rounded-lg border border-black/5 px-4 font-bold text-[10px] uppercase hover:bg-black/5 transition-all text-secondary"
-                              >
-                                Promote
-                              </Button>
-                           </div>
-                        </div>
+                         <div className="flex items-center gap-10">
+                            <div className="text-right flex flex-col items-end">
+                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Activity Metrics</p>
+                              <div className="flex gap-2 mb-2">
+                                <Badge variant="outline" className="text-[9px] border-black/5 opacity-60 italic">{person.monthsActive} months active</Badge>
+                                <Badge variant="outline" className="text-[9px] border-black/5 opacity-60 italic">{person.orderCount} orders</Badge>
+                              </div>
+                              <Badge className={`${person.role === 'ADMIN' ? 'bg-black text-white shadow-[0_0_15px_rgba(0,0,0,0.2)]' : 
+                                                person.role === 'VIP' ? 'bg-secondary text-white shadow-[0_0_15px_rgba(255,0,0,0.2)]' : 
+                                                'bg-secondary/10 text-secondary'} font-bold px-4 py-1 rounded-full uppercase tracking-tighter`}>
+                                {person.role === 'ADMIN' ? 'The Maestro' : 
+                                 person.role === 'VIP' ? 'The VIP' :
+                                 person.role === 'MUSE' ? 'The Muse' :
+                                 person.role === 'COLLECTOR' ? 'The Collector' : 'The Guest'}
+                              </Badge>
+                            </div>
+                            <div className="flex gap-3 h-10">
+                               <Button 
+                                 variant="ghost" 
+                                 onClick={() => handlePromote(person.id, person.role)}
+                                 disabled={person.role === 'VIP' || person.role === 'ADMIN'}
+                                 className="rounded-lg border border-black/5 px-4 font-bold text-[10px] uppercase hover:bg-black/5 transition-all text-secondary"
+                               >
+                                 {person.role === 'COLLECTOR' ? 'Elevate to Muse' : person.role === 'MUSE' ? 'Elevate to VIP' : 'Max Depth'}
+                               </Button>
+                            </div>
+                         </div>
                       </div>
                     ))}
                   </div>
