@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { HeroCarousel } from '@/components/sections/HeroCarousel';
 import { BabylonCrochetViewer } from '@/components/Three/BabylonCrochetViewer';
-import { CustomerReviews, ContactSection, WhatsAppFloat } from '@/components/sections/SocialSections';
+import { ContactSection, WhatsAppFloat } from '@/components/sections/SocialSections';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase, isConfigured } from '@/lib/supabase';
 import { Product } from '@/types';
@@ -159,7 +159,7 @@ export function Home() {
                     Exhibition Choice
                   </Badge>
                   <img 
-                    src={mainFeatured.image_url} 
+                    src={mainFeatured.image_urls[0]} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
                     alt={mainFeatured.name}
                     referrerPolicy="no-referrer"
@@ -207,7 +207,7 @@ export function Home() {
                     <div className="flex-1 flex flex-col md:flex-row">
                       <div className="w-full md:w-1/2 aspect-square md:aspect-auto overflow-hidden relative">
                         <img 
-                          src={item.image_url} 
+                          src={item.image_urls[0]} 
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           alt={item.name}
                           referrerPolicy="no-referrer"
@@ -235,7 +235,6 @@ export function Home() {
         </section>
 
         {/* New Social Proof & Contact Sections */}
-        <CustomerReviews />
         <ContactSection />
 
         {/* Guest Nudge Section */}

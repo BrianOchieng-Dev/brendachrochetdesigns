@@ -11,6 +11,7 @@ const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'Portfolio', path: '/portfolio' },
   { name: 'Shop', path: '/shop' },
+  { name: 'Sustainability', path: '/sustainability' },
 ];
 
 export function Header() {
@@ -46,7 +47,7 @@ export function Header() {
           <div className="p-2 bg-black/5 rounded-full group-hover:bg-primary/10 transition-colors">
             <Scissors className="w-5 h-5 text-primary" />
           </div>
-          <span className="font-extrabold tracking-tighter text-lg md:text-xl bg-clip-text text-transparent bg-gradient-to-r from-slate-950 to-slate-600 uppercase">
+          <span className="hidden sm:block font-extrabold tracking-tighter text-lg md:text-xl bg-clip-text text-transparent bg-gradient-to-r from-slate-950 to-slate-600 uppercase">
             Brenda Designs
           </span>
         </Link>

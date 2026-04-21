@@ -1,38 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Star, MessageSquare, Quote, Send, MapPin, Phone, Mail, Instagram, Facebook, Twitter, MessageCircle, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, Send, MapPin, Phone, Mail, Instagram, Facebook, Twitter, MessageCircle, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { supabase, isConfigured } from '@/lib/supabase';
 
-const reviews = [
-  {
-    id: 1,
-    name: "Elena Richardson",
-    role: "Fashion Curator",
-    content: "The level of intricate detail in Brenda's crochet work is unprecedented. It's not just fashion; it's wearable sculpture.",
-    rating: 5,
-    image: "https://picsum.photos/seed/curator1/100/100"
-  },
-  {
-    id: 2,
-    name: "Marcus Vane",
-    role: "Private Collector",
-    content: "I commissioned a bespoke shawl for a gallery opening. The sustainability of the fibers and the craftsmanship were beyond expectation.",
-    rating: 5,
-    image: "https://picsum.photos/seed/collector1/100/100"
-  },
-  {
-    id: 3,
-    name: "Sarah Jenkins",
-    role: "Sustainability Advocate",
-    content: "Seeing traditional Kenyan techniques elevated to this level of luxury while maintaining ethical sourcing is truly inspiring.",
-    rating: 5,
-    image: "https://picsum.photos/seed/advocate1/100/100"
-  }
-];
 
 export function WhatsAppFloat() {
   return (
@@ -49,59 +23,6 @@ export function WhatsAppFloat() {
       <MessageCircle className="w-6 h-6 fill-current" />
       <span className="sr-only">Chat on WhatsApp</span>
     </motion.a>
-  );
-}
-
-export function CustomerReviews() {
-  return (
-    <section className="py-24 max-w-7xl mx-auto px-6 space-y-16">
-      <div className="text-center space-y-4">
-        <h2 className="text-3xl md:text-5xl lg:text-5xl font-bold tracking-tighter text-glow text-foreground uppercase leading-none">
-          Voice of the Collective
-        </h2>
-        <p className="text-lg md:text-xl font-medium italic text-muted-foreground">Stories from those who wear the art.</p>
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-8">
-        {reviews.map((review, index) => (
-          <motion.div
-            key={review.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card className="glass-card border-black/5 rounded-lg p-8 h-full flex flex-col justify-between hover:border-secondary/20 transition-all duration-700">
-              <div className="space-y-6">
-                <div className="flex gap-1">
-                  {[...Array(review.rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-secondary text-secondary" />
-                  ))}
-                </div>
-                <div className="relative">
-                  <Quote className="absolute -top-4 -left-4 w-12 h-12 text-secondary/10 -z-10" />
-                  <p className="text-lg font-medium italic leading-relaxed text-foreground/80">
-                    "{review.content}"
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-4 mt-8 pt-6 border-t border-black/5">
-                <img 
-                  src={review.image} 
-                  alt={review.name} 
-                  className="w-12 h-12 rounded-full border border-black/5 object-cover"
-                />
-                <div>
-                  <h4 className="font-bold text-foreground">{review.name}</h4>
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{review.role}</p>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-    </section>
   );
 }
 

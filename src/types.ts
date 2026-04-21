@@ -10,7 +10,7 @@ export interface Product {
   price: number;
   currency: string; // 'Ksh'
   category: 'FASHION' | 'ACCESSORIES' | 'PATTERNS';
-  image_url: string;
+  image_urls: string[];
   created_at: string;
   is_featured: boolean;
 }

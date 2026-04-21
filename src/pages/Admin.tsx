@@ -29,7 +29,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Product, PortfolioItem, Inquiry } from '@/types';
-import { supabase } from '@/lib/supabase';
+import { supabase, isConfigured } from '@/lib/supabase';
 import { useAuth, AdminAuthority, UserRole } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { 
@@ -95,6 +95,10 @@ export function Admin() {
   }, []);
 
   async function fetchAllData() {
+    if (!isConfigured) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     
     try {
@@ -150,6 +154,7 @@ export function Admin() {
   }
 
   async function handleAddProduct(e: React.FormEvent) {
+    if (!isConfigured) return;
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const product = {
@@ -179,6 +184,7 @@ export function Admin() {
   }
 
   async function handleAddPortfolio(e: React.FormEvent) {
+    if (!isConfigured) return;
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const item = {
@@ -201,6 +207,7 @@ export function Admin() {
   }
 
   async function handleResolveInquiry(id: string) {
+    if (!isConfigured) return;
     const response = prompt('Craft your response to the customer:');
     if (!response) return;
 
@@ -220,6 +227,7 @@ export function Admin() {
   }
 
   async function handlePromote(personId: string, currentRole: string) {
+    if (!isConfigured) return;
     const roles: UserRole[] = ['GUEST', 'COLLECTOR', 'MUSE', 'ADMIN'];
     const currentIndex = roles.indexOf(currentRole as UserRole);
     const nextRole = roles[(currentIndex + 1) % roles.length];
@@ -235,6 +243,7 @@ export function Admin() {
   }
 
   async function updateNarrative(section: string) {
+    if (!isConfigured) return;
     const newContent = prompt('Enter new narrative content:');
     if (!newContent) return;
 

@@ -26,7 +26,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
+import { supabase, isConfigured } from '@/lib/supabase';
 
 
 export function Profile() {
@@ -50,7 +50,7 @@ export function Profile() {
   }, [user]);
 
   async function fetchProfileStats() {
-    if (!user) return;
+    if (!user || !isConfigured) return;
     
     try {
       // Fetch order count
@@ -65,6 +65,7 @@ export function Profile() {
   }
 
   const handleUpdateMeasurements = async () => {
+    if (!isConfigured) return;
     try {
       const { error } = await supabase.auth.updateUser({
         data: { measurements }
@@ -85,6 +86,7 @@ export function Profile() {
   };
 
   const handleUpdateProfile = async () => {
+    if (!isConfigured) return;
     try {
       const { error } = await supabase.auth.updateUser({
         data: { full_name: fullName }

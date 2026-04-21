@@ -10,6 +10,8 @@ import { Home } from '@/pages/Home';
 // Lazy load other pages
 const Portfolio = lazy(() => import('@/pages/Portfolio').then(m => ({ default: m.Portfolio })));
 const Shop = lazy(() => import('@/pages/Shop').then(m => ({ default: m.Shop })));
+const ProductDetail = lazy(() => import('@/pages/ProductDetail').then(m => ({ default: m.ProductDetail })));
+const Sustainability = lazy(() => import('@/pages/Sustainability').then(m => ({ default: m.Sustainability })));
 const Admin = lazy(() => import('@/pages/Admin').then(m => ({ default: m.Admin })));
 const Auth = lazy(() => import('@/pages/Auth').then(m => ({ default: m.Auth })));
 const Profile = lazy(() => import('@/pages/Profile').then(m => ({ default: m.Profile })));
@@ -46,6 +48,8 @@ export default function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/portfolio" element={<Portfolio />} />
                 <Route path="/shop" element={<Shop />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/sustainability" element={<Sustainability />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route 
                   path="/wishlist" 

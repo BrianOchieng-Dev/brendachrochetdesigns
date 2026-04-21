@@ -68,7 +68,7 @@ export function Wishlist() {
             <AnimatePresence>
               {wishlist.map(product => (
                 <motion.div key={product.id} layout exit={{ opacity: 0, scale: 0.9 }} className="glass-card rounded-lg overflow-hidden flex flex-col">
-                  <img src={product.image_url} alt={product.name} className="aspect-[3/4] object-cover" />
+                  <img src={product.image_urls[0]} alt={product.name} className="aspect-[3/4] object-cover" />
                   <div className="p-4 flex justify-between items-center">
                     <h3 className="font-bold">{product.name}</h3>
                     <Button variant="ghost" size="icon" onClick={() => removeFromWishlist(product.id)}>

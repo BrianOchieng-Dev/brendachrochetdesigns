@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -20,6 +21,10 @@ export function Shop() {
   const [search, setSearch] = useState('');
 
   async function toggleWishlist(productId: string) {
+    if (!isConfigured) {
+      toast.error('Supabase is not configured.');
+      return;
+    }
     if (!user) {
       toast.error('Please login to add to wishlist');
       return;
@@ -96,15 +101,21 @@ export function Shop() {
     }
   }
 
-  const filteredProducts = products.filter(p => {
-    // Only Muses see "Exclusives" (simulated by looking at price/description or specific tag)
-    const isExclusive = p.name.includes('Primal') || p.description.includes('Exclusive');
-    if (isExclusive && !isMuse) return false;
-    
-    const matchesFilter = filter === 'ALL' || p.category === filter || (filter === 'EXCLUSIVES' && isExclusive);
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
+  const filteredProducts = useMemo(() => {
+    let result = products.filter(p => {
+      // Only Muses see "Exclusives" (simulated by looking at price/description or specific tag)
+      const isExclusive = p.name.includes('Primal') || p.description.includes('Exclusive');
+      if (isExclusive && !isMuse) return false;
+      
+      const matchesFilter = filter === 'ALL' || p.category === filter || (filter === 'EXCLUSIVES' && isExclusive);
+      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
+      return matchesFilter && matchesSearch;
+    });
+
+    result.sort((a, b) => a.name.localeCompare(b.name));
+
+    return result;
+  }, [products, filter, search, isMuse]);
 
   const availableCategories = CATEGORIES.filter(cat => cat !== 'EXCLUSIVES' || isMuse);
 
@@ -132,20 +143,23 @@ export function Shop() {
               />
             </div>
 
-            <Tabs defaultValue="ALL" onValueChange={(v) => setFilter(v as any)} className="w-full md:w-auto">
-              <TabsList className="glass-panel p-1.5 rounded-full gap-2 border-black/5 h-14 bg-white/40">
-                {availableCategories.map(cat => (
-                  <TabsTrigger 
-                    key={cat} 
-                    value={cat} 
-                    className="rounded-full px-6 md:px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all font-bold tracking-[0.1em] text-[10px] md:text-xs uppercase text-foreground/60"
-                  >
-                    {cat === 'EXCLUSIVES' && <Crown className="w-3 h-3 mr-2" />}
-                    {cat}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+              <Tabs defaultValue="ALL" onValueChange={(v) => setFilter(v as any)} className="w-full md:w-auto">
+                <TabsList className="glass-panel p-1.5 rounded-full gap-2 border-black/5 h-14 bg-white/40">
+                  {availableCategories.map(cat => (
+                    <TabsTrigger 
+                      key={cat} 
+                      value={cat} 
+                      className="rounded-full px-6 md:px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all font-bold tracking-[0.1em] text-[10px] md:text-xs uppercase text-foreground/60"
+                    >
+                      {cat === 'EXCLUSIVES' && <Crown className="w-3 h-3 mr-2" />}
+                      {cat}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+
           </div>
         </header>
 
@@ -161,14 +175,16 @@ export function Shop() {
                 transition={{ duration: 0.3 }}
                 className="glass-card kfc-card-accent group flex flex-col rounded-lg overflow-hidden pl-1.5"
               >
-                <div className="aspect-[3/4] overflow-hidden relative">
+                 <div className="aspect-[3/4] overflow-hidden relative">
                   <div className="absolute inset-0 bg-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
-                  <img 
-                    src={product.image_url} 
-                    className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 ease-out cursor-zoom-in"
-                    alt={product.name}
-                    referrerPolicy="no-referrer"
-                  />
+                  <Link to={`/product/${product.id}`}>
+                    <img 
+                      src={product.image_urls[0]} 
+                      className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 ease-out cursor-pointer"
+                      alt={product.name}
+                      referrerPolicy="no-referrer"
+                    />
+                  </Link>
                   <div className="absolute top-4 left-4 flex flex-col gap-2">
                     {product.is_featured && (
                       <Badge className="bg-secondary/20 backdrop-blur-md border border-secondary/40 text-secondary font-bold px-3 py-1">
