@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-  --font-heading: "Inter", sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-heading: "Syne", sans-serif;
   
   --radius-lg: 24px;
   --radius-md: 16px;
@@ -16,7 +16,7 @@
   --color-secondary: oklch(0.55 0.22 25); /* Premium Red */
   --color-secondary-foreground: white;
 
-  --color-glass-white: rgba(0, 0, 0, 0.03);
+  --color-glass-white: rgba(255, 255, 255, 0.03);
   --color-glass-border: rgba(0, 0, 0, 0.08);
   --color-glass-highlight: rgba(255, 255, 255, 0.8);
 }
@@ -42,71 +42,44 @@
   }
 
   .glass-card {
-    @apply backdrop-blur-[32px] bg-white/40 border border-black/[0.06] hover:border-secondary/40 transition-all duration-500 ease-out;
+    @apply backdrop-blur-[48px] bg-white/40 border border-black/[0.06] hover:border-secondary/40 transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 
-      inset 0 1px 1px 0 rgba(255, 255, 255, 0.8),
-      0 12px 24px -8px rgba(0, 0, 0, 0.1),
-      0 0 0 0 rgba(255, 0, 0, 0);
+      inset 0 1px 2px 0 rgba(255, 255, 255, 0.9),
+      0 12px 24px -8px rgba(0, 0, 0, 0.1);
   }
 
   .glass-card:hover {
     box-shadow: 
       inset 0 1px 1px 0 rgba(255, 255, 255, 1),
-      0 20px 40px -12px rgba(0, 0, 0, 0.12),
-      0 0 20px 0 rgba(255, 0, 0, 0.1);
-    transform: translateY(-4px);
+      0 24px 48px -12px rgba(0, 0, 0, 0.15),
+      0 0 30px 0 rgba(255, 0, 0, 0.08);
+    transform: translateY(-6px) scale(1.01);
   }
 
   .glass-interactive {
-    @apply backdrop-blur-[40px] bg-white/50 border border-black/[0.05] shadow-[0_8px_40px_rgba(0,0,0,0.08)] hover:bg-white/80 active:scale-[0.98] transition-all;
-    box-shadow: 
-      inset 0 0 0 1px rgba(255, 255, 255, 0.6),
-      0 8px 32px 0 rgba(0, 0, 0, 0.05),
-      inset 0 -10px 20px -10px rgba(255, 0, 0, 0.05);
+    @apply backdrop-blur-[40px] bg-white/50 border border-black/[0.05] shadow-[0_8px_40px_rgba(0,0,0,0.08)] hover:bg-white/80 active:scale-[0.98] transition-all duration-300;
   }
 
   .mesh-gradient {
     background-image: 
-      radial-gradient(at 0% 0%, oklch(0.55 0.25 260 / 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, oklch(0.6 0.2 280 / 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, oklch(0.55 0.22 25 / 0.1) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, oklch(0.65 0.15 220 / 0.1) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, oklch(0.55 0.25 260 / 0.15) 0px, transparent 55%),
+      radial-gradient(at 100% 0%, oklch(0.6 0.2 280 / 0.15) 0px, transparent 55%),
+      radial-gradient(at 100% 100%, oklch(0.55 0.22 25 / 0.15) 0px, transparent 55%),
+      radial-gradient(at 0% 100%, oklch(0.65 0.15 220 / 0.15) 0px, transparent 55%);
     background-attachment: fixed;
   }
 
   .text-glow {
-    text-shadow: 0 0 30px oklch(0.55 0.22 25 / 0.15);
+    text-shadow: 0 0 40px oklch(0.55 0.22 25 / 0.25);
   }
 
-  .kfc-stripes {
-    background-image: repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 20px,
-      oklch(0.55 0.22 25 / 0.05) 20px,
-      oklch(0.55 0.22 25 / 0.05) 40px
-    );
+  .artisanal-float {
+    animation: artisanal-float 6s ease-in-out infinite;
   }
 
-  .kfc-card-accent {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .kfc-card-accent::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 6px;
-    height: 100%;
-    background: repeating-linear-gradient(
-      0deg,
-      var(--secondary) 0%,
-      var(--secondary) 15px,
-      white 15px,
-      white 30px
-    );
+  @keyframes artisanal-float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
   }
 
   .liquid-refraction {
@@ -118,26 +91,24 @@
     content: '';
     position: absolute;
     inset: -1px;
-    background: linear-gradient(135deg, rgba(0,0,0,0.05) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.02) 100%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.1) 100%);
     z-index: 1;
     pointer-events: none;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
     @apply rounded-[inherit] border border-transparent;
   }
 }
 
 /* Custom Webkit scrollbar for white aesthetic */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-slate-50;
+  @apply bg-background;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-black/10 rounded-full border-2 border-slate-50 hover:bg-secondary/40 transition-colors;
+  @apply bg-black/5 rounded-full border-2 border-background hover:bg-secondary/20 transition-all duration-500;
 }
 
 @import "tw-animate-css";

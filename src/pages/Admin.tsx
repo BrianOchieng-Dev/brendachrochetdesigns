@@ -32,6 +32,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Product, PortfolioItem, Inquiry, Philosophy } from '@/types';
 import { supabase, isConfigured } from '@/lib/supabase';
@@ -64,7 +65,11 @@ export function Admin() {
   const [personnel, setPersonnel] = useState<any[]>([]);
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [portfolio, setPortfolio] = useState<any[]>([]);
+  const [activities, setActivities] = useState<any[]>([]);
   const [philosophies, setPhilosophies] = useState<Philosophy[]>([]);
+  const [commissionConfig, setCommissionConfig] = useState<any>(null);
+  const [respondingToInquiry, setRespondingToInquiry] = useState<string | null>(null);
+  const [adminResponse, setAdminResponse] = useState('');
   const [stats, setStats] = useState({
     revenue: 'Ksh 0',
     commissions: '0',
@@ -80,7 +85,7 @@ export function Admin() {
   const [editingPhilosophy, setEditingPhilosophy] = useState<Philosophy | null>(null);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState('DASHBOARD');
+  const [activeTab, setActiveTab] = useState('OVERVIEW');
 
   const displayName = user?.user_metadata?.full_name || 'Maestro';
 
@@ -192,6 +197,10 @@ export function Admin() {
       // 6. Fetch Portfolio
       const { data: portfolioData } = await supabase.from('portfolio').select('*').order('created_at', { ascending: false });
       if (portfolioData) setPortfolio(portfolioData);
+
+      // 7. Fetch Commission Config
+      const { data: configData } = await supabase.from('commission_config').select('*').single();
+      if (configData) setCommissionConfig(configData);
 
     } catch (error: any) {
         toast.error('Sync failed: ' + error.message);
@@ -386,20 +395,31 @@ export function Admin() {
     }
   }
 
-  async function handleResolveInquiry(id: string) {
-    if (!isConfigured) return;
-    const response = prompt('Craft your response to the customer:');
-    if (!response) return;
+  async function handleResolveInquiry(id: string, customerId?: string) {
+    if (!isConfigured || !adminResponse) return;
 
     try {
       const { error } = await supabase.from('inquiries').update({ 
         status: 'RESOLVED',
-        response,
+        response: adminResponse,
         updated_at: new Date().toISOString()
       }).eq('id', id);
       
       if (error) throw error;
-      toast.success('Inquiry resolved. Customer notified via record.');
+
+      // Create notification for the customer if ID exists
+      if (customerId) {
+        await supabase.from('notifications').insert([{
+          user_id: customerId,
+          title: 'Studio Response Received',
+          message: 'The Studio Maestro has responded to your inquiry regarding artisanal craftsmanship.',
+          type: 'INQUIRY'
+        }]);
+      }
+
+      toast.success('Inquiry resolved. Notification dispatched.');
+      setRespondingToInquiry(null);
+      setAdminResponse('');
       fetchAllData();
     } catch (error: any) {
       toast.error('Response failed: ' + error.message);
@@ -478,7 +498,12 @@ export function Admin() {
       setIsAddingPhilosophy(false);
       setEditingPhilosophy(null);
     } catch (error: any) {
-      toast.error(error.message);
+      console.error('Error saving philosophy:', error);
+      if (error.code === '42501') {
+        toast.error('Security Breach: Your current clearance level does not allow managing philosophies. Please run the Security Sync SQL script.');
+      } else {
+        toast.error(error.message);
+      }
     } finally {
       setIsUploading(false);
     }
@@ -493,6 +518,44 @@ export function Admin() {
       fetchAllData();
     } catch (error: any) {
       toast.error(error.message);
+    }
+  };
+
+  const toggleCommissionStatus = async () => {
+    if (!commissionConfig) return;
+    try {
+      const newStatus = !commissionConfig.is_open;
+      const { error } = await supabase
+        .from('commission_config')
+        .update({ is_open: newStatus })
+        .eq('singleton_id', 1);
+      
+      if (error) throw error;
+      setCommissionConfig({ ...commissionConfig, is_open: newStatus });
+      toast.success(newStatus ? 'Commissions Open' : 'Commissions Closed');
+    } catch (error: any) {
+      toast.error('Status update failed: ' + error.message);
+    }
+  };
+
+  const handleAssignPriority = async (userId: string, currentRole: string) => {
+    try {
+      const { error } = await supabase
+        .from('commission_access')
+        .insert([{ user_id: userId, slots_allocated: 1, reason: `Loyalty Reward (${currentRole})` }])
+        .select();
+      
+      if (error) {
+        if (error.code === '23505') {
+          toast.error('Collector already holds a priority slot.');
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success('Priority Slot Assigned');
+      }
+    } catch (error: any) {
+      toast.error('Assignment failed: ' + error.message);
     }
   };
 
@@ -539,7 +602,7 @@ export function Admin() {
           </div>
         </header>
 
-        <Tabs defaultValue="OVERVIEW" className="space-y-10">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-10">
           <TabsList className="glass-panel p-2 rounded-full gap-2 border-black/5 h-16 bg-white/40 mb-10 w-full md:w-fit mx-auto md:mx-0 overflow-x-auto overflow-y-hidden">
             <TabsTrigger value="OVERVIEW" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Overview</TabsTrigger>
             <TabsTrigger value="CUSTOMERS" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Collective</TabsTrigger>
@@ -583,17 +646,20 @@ export function Admin() {
                   <Globe className="w-6 h-6 text-secondary" /> Global Feed
                 </CardTitle>
                 <div className="space-y-8">
-                  {activities.map((activity, i) => (
-                    <div key={i} className="flex items-center gap-5 group">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-black/5 flex items-center justify-center group-hover:bg-secondary/10 transition-colors">
-                        <activity.icon className="w-5 h-5 text-muted-foreground group-hover:text-secondary transition-colors" />
+                  {activities.map((activity, i) => {
+                    const Icon = activity.icon;
+                    return (
+                      <div key={i} className="flex items-center gap-5 group">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-black/5 flex items-center justify-center group-hover:bg-secondary/10 transition-colors">
+                          {Icon && <Icon className="w-5 h-5 text-muted-foreground group-hover:text-secondary transition-colors" />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-xs uppercase tracking-widest text-muted-foreground mb-1">{activity.t}</p>
+                          <p className="font-bold text-foreground leading-tight"><span className="text-secondary italic">{activity.u}</span> {activity.a}</p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="font-bold text-xs uppercase tracking-widest text-muted-foreground mb-1">{activity.t}</p>
-                        <p className="font-bold text-foreground leading-tight"><span className="text-secondary italic">{activity.u}</span> {activity.a}</p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   <Button variant="ghost" className="w-full rounded-full border border-black/5 font-bold uppercase tracking-widest text-[10px] h-12 hover:bg-black/5">View Full Ledger</Button>
                 </div>
               </Card>
@@ -643,9 +709,31 @@ export function Admin() {
                 <h3 className="text-2xl font-bold uppercase tracking-tight">Commission Facilitator</h3>
                 <p className="text-sm text-muted-foreground font-medium italic">Open, close, and assign custom crochet commission slots.</p>
                 <div className="space-y-4 pt-4">
-                   <div className="flex items-center justify-between">
-                     <span className="text-xs font-bold uppercase tracking-widest">Global Status: <span className="text-green-500">OPEN</span></span>
-                     <Button variant="outline" className="rounded-full border-red-500/20 text-red-500 h-10 px-6 font-bold text-[10px] uppercase">Close Slots</Button>
+                   <div className="flex items-center justify-between border-b border-black/5 pb-4">
+                     <div>
+                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Global Status</p>
+                       <span className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${commissionConfig?.is_open ? 'text-green-500' : 'text-red-500'}`}>
+                         <span className={`w-2 h-2 rounded-full ${commissionConfig?.is_open ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
+                         {commissionConfig?.is_open ? 'Open' : 'Closed'}
+                       </span>
+                     </div>
+                     <Button 
+                       onClick={toggleCommissionStatus}
+                       variant={commissionConfig?.is_open ? "outline" : "default"} 
+                       className={`rounded-full h-10 px-6 font-bold text-[10px] uppercase transition-all ${commissionConfig?.is_open ? 'border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-black text-white'}`}
+                     >
+                       {commissionConfig?.is_open ? 'Close Slots' : 'Open Slots'}
+                     </Button>
+                   </div>
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-black/[0.02] p-4 rounded-lg">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Active Load</p>
+                        <p className="text-xl font-bold">{commissionConfig?.current_load || 0} / {commissionConfig?.max_slots || 0}</p>
+                      </div>
+                      <div className="bg-black/[0.02] p-4 rounded-lg">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Priority Reservations</p>
+                        <p className="text-xl font-bold text-secondary">Locked</p>
+                      </div>
                    </div>
                 </div>
               </Card>
@@ -673,40 +761,49 @@ export function Admin() {
                 <CardContent className="p-0">
                   <div className="divide-y divide-black/5">
                     {personnel.map((person, i) => (
-                      <div key={i} className="p-8 flex items-center justify-between hover:bg-black/[0.01] transition-all group">
-                        <div className="flex items-center gap-6">
-                           <div className="w-14 h-14 rounded-lg bg-secondary/10 flex items-center justify-center font-bold text-secondary text-lg border border-secondary/20">
+                      <div key={i} className="p-6 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 hover:bg-black/[0.01] transition-all border-b border-black/[0.02] last:border-0 group">
+                        <div className="flex items-center gap-6 w-full md:w-auto">
+                           <div className="w-16 h-16 rounded-xl bg-secondary/10 flex items-center justify-center font-bold text-secondary text-xl border border-secondary/20 shadow-sm flex-shrink-0">
                              {person.name.split(' ').map((n: string) => n[0]).join('')}
                            </div>
-                           <div>
-                             <p className="font-bold text-xl text-foreground">{person.name}</p>
-                             <p className="text-sm font-medium text-muted-foreground italic max-w-[200px] truncate">{person.email}</p>
+                           <div className="min-w-0">
+                             <p className="font-bold text-xl text-foreground truncate">{person.name}</p>
+                             <p className="text-sm font-medium text-muted-foreground italic truncate max-w-[200px]">{person.email}</p>
                            </div>
                         </div>
-                         <div className="flex items-center gap-10">
-                            <div className="text-right flex flex-col items-end">
-                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Activity Metrics</p>
-                              <div className="flex gap-2 mb-2">
-                                <Badge variant="outline" className="text-[9px] border-black/5 opacity-60 italic">{person.monthsActive} months active</Badge>
-                                <Badge variant="outline" className="text-[9px] border-black/5 opacity-60 italic">{person.orderCount} orders</Badge>
+                        
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 md:gap-10 w-full md:w-auto">
+                            <div className="text-left md:text-right flex flex-col items-start md:items-end">
+                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2 opacity-60">
+                                Loyalty Context /// <span className="text-foreground">Score: {(person.monthsActive * 2) + person.orderCount}</span>
+                              </p>
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                <Badge variant="outline" className="text-[9px] border-black/5 opacity-80 italic font-medium">{person.monthsActive}m Loyalty</Badge>
+                                <Badge variant="outline" className="text-[9px] border-black/5 opacity-80 italic font-medium">{person.orderCount} Orders</Badge>
                               </div>
-                              <Badge className={`${person.role === 'ADMIN' ? 'bg-black text-white shadow-[0_0_15px_rgba(0,0,0,0.2)]' : 
-                                                person.role === 'VIP' ? 'bg-secondary text-white shadow-[0_0_15px_rgba(255,0,0,0.2)]' : 
-                                                'bg-secondary/10 text-secondary'} font-bold px-4 py-1 rounded-full uppercase tracking-tighter`}>
+                              <Badge className={`${person.role === 'ADMIN' ? 'bg-black text-white shadow-[0_10px_25px_rgba(0,0,0,0.2)]' : 
+                                                person.role === 'VIP' ? 'bg-secondary text-white shadow-[0_10px_25px_rgba(255,0,0,0.2)]' : 
+                                                'bg-secondary/10 text-secondary'} font-bold px-5 py-1.5 rounded-full uppercase tracking-tighter text-[10px]`}>
                                 {person.role === 'ADMIN' ? 'The Maestro' : 
                                  person.role === 'VIP' ? 'The VIP' :
                                  person.role === 'MUSE' ? 'The Muse' :
                                  person.role === 'COLLECTOR' ? 'The Collector' : 'The Guest'}
                               </Badge>
                             </div>
-                            <div className="flex gap-3 h-10">
+                            <div className="w-full sm:w-auto flex flex-col gap-2 pt-2 sm:pt-0">
                                <Button 
                                  variant="ghost" 
                                  onClick={() => handlePromote(person.id, person.role)}
                                  disabled={person.role === 'VIP' || person.role === 'ADMIN'}
-                                 className="rounded-lg border border-black/5 px-4 font-bold text-[10px] uppercase hover:bg-black/5 transition-all text-secondary"
+                                 className="w-full sm:w-auto rounded-full border border-black/5 px-6 h-10 font-bold text-[10px] uppercase hover:bg-black/5 transition-all text-secondary group-hover:bg-secondary/5"
                                >
-                                 {person.role === 'COLLECTOR' ? 'Elevate to Muse' : person.role === 'MUSE' ? 'Elevate to VIP' : 'Max Depth'}
+                                 {person.role === 'COLLECTOR' ? 'Elevate to Muse' : person.role === 'MUSE' ? 'Elevate to VIP' : 'Max Authority'}
+                               </Button>
+                               <Button 
+                                 onClick={() => handleAssignPriority(person.id, person.role)}
+                                 className="w-full sm:w-auto rounded-full bg-black text-white px-6 h-10 font-bold text-[10px] uppercase hover:opacity-90 transition-all shadow-md"
+                               >
+                                 Assign Priority Slot
                                </Button>
                             </div>
                          </div>
@@ -819,7 +916,7 @@ export function Admin() {
                   <p className="text-sm text-muted-foreground font-medium italic">Update the studio's craftsmanship philosophies.</p>
                   <Button 
                     variant="ghost" 
-                    onClick={() => updateNarrative('craftsmanship')}
+                    onClick={() => setActiveTab('PHILOSOPHY')}
                     className="w-full rounded-full border border-black/5 font-bold uppercase text-[10px] tracking-widest h-12"
                   >
                     Edit Philosophies
@@ -939,20 +1036,115 @@ export function Admin() {
             </AuthGate>
           </TabsContent>
 
+          <TabsContent value="PHILOSOPHY" className="space-y-12 outline-none">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <AuthGate authority="STORYTELLING_LEAD">
+                <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+                  <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
+                    <Sparkles className="w-8 h-8 text-secondary" />
+                  </div>
+                  <h3 className="text-2xl font-bold uppercase tracking-tight">Studio Pillars</h3>
+                  <p className="text-sm text-muted-foreground font-medium italic">Document new ethical or aesthetic pillars for the brand narrative.</p>
+                  <Button 
+                    onClick={() => {
+                      setEditingPhilosophy(null);
+                      setIsAddingPhilosophy(true);
+                    }}
+                    className="w-full rounded-full bg-secondary text-white font-bold uppercase text-[10px] tracking-widest h-12 shadow-[0_10px_25px_rgba(255,0,0,0.25)]"
+                  >
+                    Document Pillar
+                  </Button>
+                </Card>
+              </AuthGate>
+
+              <AuthGate authority="TECHNICAL_AUDITOR">
+                <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+                  <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
+                    <ShieldCheck className="w-8 h-8 text-secondary" />
+                  </div>
+                  <h3 className="text-2xl font-bold uppercase tracking-tight">Narrative Integrity</h3>
+                  <p className="text-sm text-muted-foreground font-medium italic">Audit and recalibrate existing studio philosophies.</p>
+                  <div className="flex items-center justify-between p-4 bg-black/5 rounded-lg">
+                    <p className="text-xs font-bold uppercase tracking-widest">Active Pillars</p>
+                    <Badge variant="secondary" className="bg-secondary text-white font-bold">{philosophies.length}</Badge>
+                  </div>
+                </Card>
+              </AuthGate>
+            </div>
+
+            <AuthGate authority="STORYTELLING_LEAD">
+              <Card className="glass-panel border-black/5 rounded-lg overflow-hidden">
+                <CardHeader className="p-10 border-b border-black/5 bg-black/[0.02]">
+                  <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
+                    <Sparkles className="w-7 h-7 text-secondary" /> Philosophical Ledger
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y divide-black/5">
+                    {philosophies.length === 0 ? (
+                      <div className="p-20 text-center italic text-muted-foreground">No philosophies documented in the studio archive.</div>
+                    ) : (
+                      philosophies.map((phil) => (
+                        <div key={phil.id} className="p-10 hover:bg-black/[0.01] transition-all grid md:grid-cols-4 gap-8 items-center">
+                          <div className="md:col-span-1 flex items-center gap-6">
+                            <div className="w-16 h-16 rounded-lg bg-secondary/10 flex items-center justify-center border border-secondary/20">
+                              {phil.icon_name === 'Leaf' ? <Leaf className="w-8 h-8 text-secondary" /> :
+                               phil.icon_name === 'Scissors' ? <Scissors className="w-8 h-8 text-secondary" /> :
+                               phil.icon_name === 'Factory' ? <Factory className="w-8 h-8 text-secondary" /> :
+                               <Sparkles className="w-8 h-8 text-secondary" />}
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-xl uppercase tracking-tighter leading-none">{phil.title}</h4>
+                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2">Pillar ID: {phil.id.slice(0, 8)}</p>
+                            </div>
+                          </div>
+                          <div className="md:col-span-2">
+                             <p className="text-foreground/70 font-medium italic line-clamp-2 leading-relaxed">"{phil.content}"</p>
+                          </div>
+                          <div className="md:col-span-1 flex justify-end gap-4">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-full hover:bg-secondary/10 hover:text-secondary"
+                              onClick={() => {
+                                setEditingPhilosophy(phil);
+                                setIsAddingPhilosophy(true);
+                              }}
+                            >
+                              <Edit className="w-5 h-5" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-full hover:bg-red-500/10 hover:text-red-500"
+                              onClick={() => handleDeletePhilosophy(phil.id)}
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </AuthGate>
+          </TabsContent>
+
           <TabsContent value="TECHNICAL" className="space-y-12 outline-none">
-             <Card className="glass-panel border-black/5 rounded-lg p-12 bg-black text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-20 opacity-10">
-                   <Lock className="w-64 h-64" />
+             <Card className="rounded-lg p-12 bg-black text-white relative overflow-hidden border-white/5 shadow-2xl">
+                <div className="absolute top-0 right-0 p-20 opacity-20">
+                   <Lock className="w-64 h-64 text-white" />
                 </div>
                 <div className="max-w-2xl space-y-8 relative z-10">
-                   <h2 className="text-5xl font-bold tracking-tighter uppercase leading-none">Security<br />Audit <span className="text-secondary italic">Terminal</span></h2>
-                   <p className="text-white/60 text-xl font-medium leading-relaxed">
+                   <h2 className="text-5xl md:text-6xl font-bold tracking-tighter uppercase leading-none text-white italic">Security<br />Audit <span className="text-secondary">Terminal</span></h2>
+                   <p className="text-white/80 text-xl font-medium leading-relaxed max-w-xl">
                      Every action within the Command Center is logged to the immutable studio ledger. 
                      Unauthorized attempts to bypass Authority Gates will trigger an immediate account audit.
                    </p>
-                   <div className="flex gap-4">
-                     <Button className="rounded-full bg-white text-black h-14 px-10 font-bold uppercase tracking-widest text-xs">Download Ledger</Button>
-                     <Button variant="outline" className="rounded-full border-white/20 text-white h-14 px-10 font-bold uppercase tracking-widest text-xs hover:bg-white/10">Rotate Secrets</Button>
+                   <div className="flex flex-wrap gap-4 pt-4">
+                     <Button className="rounded-full bg-white text-black h-16 px-10 font-bold uppercase tracking-widest text-xs hover:bg-white/90 transition-all">Download Ledger</Button>
+                     <Button variant="outline" className="rounded-full border-white/20 text-white h-16 px-10 font-bold uppercase tracking-widest text-xs hover:bg-white/10 transition-all">Rotate Secrets</Button>
                    </div>
                 </div>
              </Card>
