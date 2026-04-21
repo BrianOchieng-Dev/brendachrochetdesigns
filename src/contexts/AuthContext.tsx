@@ -27,7 +27,6 @@ interface AuthContextType {
   isAdmin: boolean;
   hasAuthority: (authority: AdminAuthority) => boolean;
   signOut: () => Promise<void>;
-  loginAsGuestAdmin: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,31 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const loginAsGuestAdmin = () => {
-    const mockUser = {
-      id: 'demo-admin-id',
-      email: 'admin@brendadesigns.com',
-      user_metadata: {
-        role: 'ADMIN',
-        full_name: 'Studio Maestro',
-        authorities: []
-      },
-      app_metadata: {},
-      aud: 'authenticated',
-      created_at: new Date().toISOString()
-    } as User;
-
-    setUser(mockUser);
-    // Create a minimal mock session
-    setSession({
-      access_token: 'mock-abc',
-      refresh_token: 'mock-xyz',
-      expires_in: 3600,
-      token_type: 'bearer',
-      user: mockUser,
-      expires_at: Math.floor(Date.now() / 1000) + 3600
-    });
-  };
 
   const signOut = async () => {
     try {
@@ -124,8 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isCollector, 
       isAdmin,
       hasAuthority,
-      signOut,
-      loginAsGuestAdmin 
+      signOut
     }}>
       {children}
     </AuthContext.Provider>

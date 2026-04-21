@@ -94,6 +94,30 @@ export function Admin() {
     };
   }, []);
 
+  if (!isAdmin && !loading) {
+    return (
+      <div className="pt-48 pb-20 px-6 flex flex-col items-center justify-center min-h-[80vh] text-center space-y-8">
+        <div className="p-8 bg-secondary/5 rounded-full relative group">
+          <div className="absolute inset-0 bg-secondary/10 rounded-full animate-ping opacity-20" />
+          <Lock className="w-20 h-20 text-secondary relative z-10" />
+        </div>
+        <div className="space-y-4 max-w-lg">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-glow text-foreground uppercase italic">Authority Restricted</h1>
+          <p className="text-muted-foreground text-lg italic leading-relaxed">
+            The thread of administrative control is reserved for the Studio Maestro. Your current digital signature does not hold the necessary clearance for this workshop.
+          </p>
+        </div>
+        <Button 
+          variant="outline" 
+          className="rounded-full border-secondary/30 text-secondary hover:bg-secondary hover:text-white px-10 h-14 font-bold uppercase tracking-widest transition-all"
+          onClick={() => window.location.href = '/'}
+        >
+          Return to The Shop
+        </Button>
+      </div>
+    );
+  }
+
   async function fetchAllData() {
     if (!isConfigured) {
       setLoading(false);
@@ -156,6 +180,7 @@ export function Admin() {
   async function handleAddProduct(e: React.FormEvent) {
     if (!isConfigured) return;
     e.preventDefault();
+
     const formData = new FormData(e.target as HTMLFormElement);
     const product = {
       name: formData.get('name') as string,

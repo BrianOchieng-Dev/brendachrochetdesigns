@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 export function Auth() {
-  const { loginAsGuestAdmin } = useAuth();
+  const { } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -23,25 +23,15 @@ export function Auth() {
 
     try {
       if (isLogin) {
-        // Exclusive Admin Logic for brenda123@gmail.com
-        const isAdminEmail = email.trim() === 'brenda123@gmail.com';
-        
-        if (isAdminEmail && password === '123@brenda') {
-          loginAsGuestAdmin();
-          toast.success('System Bypass: Welcome, Super-Admin.');
-          navigate('/admin');
-          return;
-        }
-
-        const loginEmail = isAdminEmail ? 'admin@brendadesigns.com' : email;
+        const loginEmail = email;
 
         const { error } = await supabase.auth.signInWithPassword({
           email: loginEmail,
           password,
         });
         if (error) throw error;
-        toast.success(`Welcome back to the studio${isAdminEmail ? ', Admin' : ''}.`);
-        navigate(isAdminEmail ? '/admin' : '/profile');
+        toast.success(`Welcome back to the studio.`);
+        navigate('/profile');
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -67,12 +57,6 @@ export function Auth() {
     }
   };
 
-  const toggleAdminMode = () => {
-    setEmail('brenda123@gmail.com');
-    setPassword('123@brenda');
-    setIsLogin(true);
-    toast.info('Admin access sequence initiated.');
-  };
 
   return (
     <div className="pt-32 pb-20 px-6 bg-background min-h-screen flex items-center justify-center">
@@ -178,15 +162,6 @@ export function Auth() {
               {isLogin ? "Don't have a signature? Create one" : "Already a member? Sign in"}
             </button>
             
-            {isLogin && (
-              <button 
-                type="button"
-                onClick={toggleAdminMode}
-                className="text-[8px] font-bold uppercase tracking-[0.3em] text-muted-foreground/30 hover:text-secondary/50 transition-colors"
-              >
-                Super-Admin Entry
-              </button>
-            )}
           </div>
         </div>
       </motion.div>

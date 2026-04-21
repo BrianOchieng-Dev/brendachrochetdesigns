@@ -18,7 +18,7 @@ export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
 
   const handleSignOut = async () => {
     try {
@@ -113,15 +113,17 @@ export function Header() {
                     )}
                   </Button>
                 </Link>
-                <Link to="/admin">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className={`rounded-full hover:bg-black/5 ${location.pathname === '/admin' ? 'text-secondary bg-black/5' : 'text-foreground'} hidden md:flex`}
-                  >
-                    <LayoutDashboard className="w-5 h-5" />
-                  </Button>
-                </Link>
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className={`rounded-full hover:bg-black/5 ${location.pathname === '/admin' ? 'text-secondary bg-black/5' : 'text-foreground'} hidden md:flex`}
+                    >
+                      <LayoutDashboard className="w-5 h-5" />
+                    </Button>
+                  </Link>
+                )}
                 <Button 
                   variant="ghost" 
                   size="icon" 
@@ -183,13 +185,15 @@ export function Header() {
                       )}{" "}
                       Profile
                     </Link>
-                    <Link 
-                      to="/admin" 
-                      onClick={() => setIsOpen(false)}
-                      className="text-2xl font-bold uppercase tracking-tighter flex items-center gap-3 text-foreground/60 hover:text-foreground"
-                    >
-                      <LayoutDashboard className="w-6 h-6" /> Dashboard
-                    </Link>
+                    {isAdmin && (
+                      <Link 
+                        to="/admin" 
+                        onClick={() => setIsOpen(false)}
+                        className="text-2xl font-bold uppercase tracking-tighter flex items-center gap-3 text-foreground/60 hover:text-foreground"
+                      >
+                        <LayoutDashboard className="w-6 h-6" /> Dashboard
+                      </Link>
+                    )}
                     <Button 
                       variant="ghost" 
                       onClick={() => {

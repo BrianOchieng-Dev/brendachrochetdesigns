@@ -179,7 +179,7 @@ export function Shop() {
                   <div className="absolute inset-0 bg-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
                   <Link to={`/product/${product.id}`}>
                     <img 
-                      src={product.image_urls[0]} 
+                      src={product.image_urls?.[0] || product.image_url || ''} 
                       className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 ease-out cursor-pointer"
                       alt={product.name}
                       referrerPolicy="no-referrer"
