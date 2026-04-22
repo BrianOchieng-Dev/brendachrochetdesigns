@@ -775,7 +775,7 @@ export function Admin() {
                               <Badge className={`${person.role === 'ADMIN' ? 'bg-black text-white shadow-[0_10px_25px_rgba(0,0,0,0.2)]' : 
                                                 person.role === 'VIP' ? 'bg-secondary text-white shadow-[0_10px_25px_rgba(255,0,0,0.2)]' : 
                                                 'bg-secondary/10 text-secondary'} font-bold px-5 py-1.5 rounded-full uppercase tracking-tighter text-[10px]`}>
-                                {person.role === 'ADMIN' ? 'The Maestro' : 
+                                {person.role === 'ADMIN' ? 'The Brenda Chrochet' : 
                                  person.role === 'VIP' ? 'The VIP' :
                                  person.role === 'MUSE' ? 'The Muse' :
                                  person.role === 'COLLECTOR' ? 'The Collector' : 'The Guest'}

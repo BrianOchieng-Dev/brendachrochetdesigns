@@ -44,7 +44,7 @@ export function Auth() {
         // In production, you can re-enable this to enforce verified studio access.
 
         if (user?.email === 'crochetbrenda@gmail.com') {
-          toast.success('The Brenda Chrochet has entered the building. Studio control restored.');
+          toast.success('Brenda Chrochet has entered the building. Studio control restored.');
         } else {
           toast.success('Access granted. Welcome back to the studio.');
         }
