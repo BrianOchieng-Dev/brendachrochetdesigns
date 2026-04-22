@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShoppingBag, User, Menu, Scissors, LogOut, LayoutDashboard, Heart, X, Sparkles } from 'lucide-react';
+import { ShoppingBag, User, Menu, Scissors, LogOut, LayoutDashboard, Heart, X, Sparkles, Instagram, Facebook } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
