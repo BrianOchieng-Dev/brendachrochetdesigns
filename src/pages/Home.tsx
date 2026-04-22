@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { HeroCarousel } from '@/components/sections/HeroCarousel';
-const BabylonCrochetViewer = lazy(() => import('@/components/Three/BabylonCrochetViewer').then(m => ({ default: m.BabylonCrochetViewer })));
+import { InteractiveShowcase } from '@/components/sections/InteractiveShowcase';
 import { ContactSection, WhatsAppFloat } from '@/components/sections/SocialSections';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase, isConfigured } from '@/lib/supabase';
@@ -119,11 +119,9 @@ export function Home() {
               </div>
             </div>
             
-            <div className="h-[350px] md:h-[600px] relative rounded-lg overflow-hidden bg-black/5 backdrop-blur-sm">
+            <div className="h-[500px] md:h-[600px] relative rounded-lg overflow-hidden bg-black/5 backdrop-blur-sm shadow-2xl">
               <div className="absolute inset-0 bg-secondary/10 blur-[120px] rounded-full animate-pulse" />
-              <Suspense fallback={<div className="w-full h-full flex items-center justify-center font-bold text-secondary uppercase tracking-widest animate-pulse">Initializing Fiber Reality...</div>}>
-                <BabylonCrochetViewer />
-              </Suspense>
+              <InteractiveShowcase />
             </div>
           </div>
         </section>

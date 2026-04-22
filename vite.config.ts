@@ -25,7 +25,6 @@ export default defineConfig(({mode}) => {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
-              if (id.includes('@babylonjs')) return 'babylon';
               if (id.includes('recharts')) return 'recharts';
               if (id.includes('lucide-react')) return 'ui-icons';
               if (id.includes('motion')) return 'motion';
@@ -36,7 +35,7 @@ export default defineConfig(({mode}) => {
           }
         },
       },
-      chunkSizeWarningLimit: 1500,
+      chunkSizeWarningLimit: 1000,
     },
   };
 });
