@@ -4,7 +4,7 @@ const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Check if configuration is valid
-export const isConfigured = !!(url && url !== '' && !url.includes('placeholder')) && !!(key && key !== '' && !key.includes('sb_publishable'));
+export const isConfigured = !!(url && url.startsWith('http') && !url.includes('placeholder')) && !!(key && key.length > 20);
 
 if (!isConfigured) {
   console.warn('Supabase Configuration: Missing or invalid credentials. Check your .env file.');
