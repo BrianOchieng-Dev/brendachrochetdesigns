@@ -36,7 +36,7 @@ export function Portfolio() {
     : items.filter(item => item.category === activeTab);
 
   return (
-    <div className="pt-32 pb-20 min-h-screen bg-background text-foreground">
+    <div className="pt-40 md:pt-48 pb-20 min-h-screen bg-background text-foreground">
       <div className="max-w-7xl mx-auto px-6 space-y-24">
         {/* Editorial Hero */}
         <section className="text-center space-y-8">

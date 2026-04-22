@@ -126,7 +126,7 @@ export function Shop() {
   const availableCategories = CATEGORIES.filter(cat => cat !== 'EXCLUSIVES' || isMuse);
 
   return (
-    <div className="pt-32 pb-20 px-6 bg-background">
+    <div className="pt-40 md:pt-48 pb-20 px-6 bg-background">
       <div className="max-w-7xl mx-auto space-y-12">
         <header className="space-y-6">
           <div className="flex justify-between items-end">
