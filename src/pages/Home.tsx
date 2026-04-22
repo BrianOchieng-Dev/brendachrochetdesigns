@@ -56,7 +56,7 @@ export function Home() {
   const mainFeatured = featured[0];
   const sideFeatured = featured.slice(1);
   return (
-    <div className="pt-24 pb-20 overflow-x-hidden">
+    <div className="pt-32 md:pt-40 pb-20 overflow-x-hidden">
       {/* Full Width Hero Carousel */}
       <section className="w-full mb-24">
         <div className="w-full liquid-refraction">

@@ -45,7 +45,7 @@ export default function App() {
         <Router>
           <div className="min-h-screen mesh-gradient selection:bg-white/20 relative">
             <Header />
-            <main>
+            <main className="relative z-10 transition-all duration-500">
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<Home />} />

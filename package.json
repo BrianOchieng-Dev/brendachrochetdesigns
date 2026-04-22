@@ -11,9 +11,6 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@babylonjs/core": "^8.56.2",
-    "@babylonjs/gui": "^8.56.2",
-    "@babylonjs/loaders": "^8.56.2",
     "@base-ui/react": "^1.4.0",
     "@fontsource-variable/geist": "^5.2.8",
     "@google/genai": "^1.29.0",
@@ -34,7 +31,6 @@
     "motion": "^12.23.24",
     "next-themes": "^0.4.6",
     "react": "^19.0.0",
-    "react-babylonjs": "^3.2.5-beta.2",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.14.1",
     "recharts": "^3.8.1",

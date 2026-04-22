@@ -63,7 +63,7 @@ export function Sustainability() {
   const displayData = philosophies.length > 0 ? philosophies : fallbackPhilosophies;
 
   return (
-    <div className="pt-32 pb-20 px-6 bg-background min-h-screen">
+    <div className="pt-40 md:pt-48 pb-20 px-6 bg-background min-h-screen">
       <div className="max-w-7xl mx-auto space-y-24">
         <header className="text-center space-y-6">
           <Badge className="bg-secondary/10 text-secondary border-secondary/20 font-bold px-4 py-2 text-xs tracking-widest uppercase mb-4">

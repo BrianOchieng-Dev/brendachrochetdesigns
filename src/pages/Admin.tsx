@@ -577,7 +577,7 @@ export function Admin() {
   };
 
   return (
-    <div className="pt-24 md:pt-32 pb-20 px-4 md:px-6 bg-background min-h-screen">
+    <div className="pt-32 md:pt-40 pb-20 px-4 md:px-6 bg-background min-h-screen">
       <div className="max-w-7xl mx-auto space-y-12">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-3">
