@@ -7,6 +7,7 @@ import { PageLoader } from '@/components/ui/loaders';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { CartDrawer } from '@/components/cart/CartDrawer';
+import { AIAssistant } from '@/components/sections/AIAssistant';
 const Home = lazy(() => import('@/pages/Home').then(m => ({ default: m.Home })));
 
 // Lazy load other pages
@@ -82,6 +83,8 @@ export default function App() {
                 </Routes>
               </Suspense>
             </main>
+            <AIAssistant />
+            <WhatsAppFloat />
             <Footer />
             <CartDrawer />
             <Toaster theme="light" position="bottom-right" />
