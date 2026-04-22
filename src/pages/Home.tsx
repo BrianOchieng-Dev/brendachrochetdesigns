@@ -3,9 +3,9 @@ import { ArrowRight, Star, Heart, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { HeroCarousel } from '@/components/sections/HeroCarousel';
-import { BabylonCrochetViewer } from '@/components/Three/BabylonCrochetViewer';
+const BabylonCrochetViewer = lazy(() => import('@/components/Three/BabylonCrochetViewer').then(m => ({ default: m.BabylonCrochetViewer })));
 import { ContactSection, WhatsAppFloat } from '@/components/sections/SocialSections';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase, isConfigured } from '@/lib/supabase';
@@ -121,7 +121,9 @@ export function Home() {
             
             <div className="h-[350px] md:h-[600px] relative rounded-lg overflow-hidden bg-black/5 backdrop-blur-sm">
               <div className="absolute inset-0 bg-secondary/10 blur-[120px] rounded-full animate-pulse" />
-              <BabylonCrochetViewer />
+              <Suspense fallback={<div className="w-full h-full flex items-center justify-center font-bold text-secondary uppercase tracking-widest animate-pulse">Initializing Fiber Reality...</div>}>
+                <BabylonCrochetViewer />
+              </Suspense>
             </div>
           </div>
         </section>
