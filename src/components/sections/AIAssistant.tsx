@@ -69,7 +69,7 @@ export function AIAssistant() {
         return;
       }
 
-      const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      const openAIResponse = await fetch('/api/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,10 +95,21 @@ export function AIAssistant() {
       const data = await openAIResponse.json();
       const aiText = data.choices[0].message.content;
       setMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
-    } catch (error) {
-      console.error('AI error:', error);
-      toast.error("Studio Intelligence link interrupted.");
-      setMessages(prev => [...prev, { role: 'assistant', content: "I apologize, Collector. My connection to the studio archives has been severed. Please try again shortly." }]);
+    } catch (error: any) {
+      console.error('AI Assistant Error:', error);
+      
+      // Provide more specific feedback for common errors
+      if (error.message?.includes('401')) {
+        toast.error("Authentication failed: Check your OpenAI API key.");
+      } else if (error.message?.includes('429')) {
+        toast.error("Rate limit exceeded: Please try again later.");
+      } else if (error.message?.includes('Failed to fetch')) {
+        toast.error("Network error: Possible CORS issue or connection blocked.");
+      } else {
+        toast.error(`Studio Intelligence link interrupted: ${error.message || 'Unknown error'}`);
+      }
+      
+      setMessages(prev => [...prev, { role: 'assistant', content: "I apologize, Collector. My connection to the studio archives has been severed. This often happens if the security protocols (CORS) or API keys are not fully aligned. Please check the console for details." }]);
     } finally {
       setIsLoading(false);
     }

@@ -129,23 +129,36 @@ export function Header() {
                     </Button>
                   </Link>
                 ) : (
-                  <Link to="/profile">
-                    <Button 
-                      variant="ghost" 
-                      className={`rounded-full h-12 px-6 flex items-center gap-3 hover:bg-black/5 border border-black/5 ${location.pathname === '/profile' ? 'bg-black/5' : ''}`}
-                    >
-                      {user?.user_metadata?.avatar_url ? (
-                        <div className="w-6 h-6 rounded-full overflow-hidden border border-black/10">
-                          <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" alt="Profile" />
-                        </div>
-                      ) : (
-                        <User className="w-5 h-5" />
-                      )}
-                      <span className="text-[10px] font-black uppercase tracking-widest">
-                        {user.user_metadata?.full_name?.split(' ')[0] || 'Member'}
-                      </span>
-                    </Button>
-                  </Link>
+                  <div className="flex items-center gap-3">
+                    {isAdmin && (
+                      <Link to="/admin">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="rounded-full w-12 h-12 hover:bg-black/5 text-secondary border border-secondary/10"
+                        >
+                          <LayoutDashboard className="w-5 h-5" />
+                        </Button>
+                      </Link>
+                    )}
+                    <Link to="/profile">
+                      <Button 
+                        variant="ghost" 
+                        className={`rounded-full h-12 px-6 flex items-center gap-3 hover:bg-black/5 border border-black/5 ${location.pathname === '/profile' ? 'bg-black/5' : ''}`}
+                      >
+                        {user?.user_metadata?.avatar_url ? (
+                          <div className="w-6 h-6 rounded-full overflow-hidden border border-black/10">
+                            <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" alt="Profile" />
+                          </div>
+                        ) : (
+                          <User className="w-5 h-5" />
+                        )}
+                        <span className="text-[10px] font-black uppercase tracking-widest">
+                          {user.user_metadata?.full_name?.split(' ')[0] || 'Member'}
+                        </span>
+                      </Button>
+                    </Link>
+                  </div>
                 )}
               </AnimatePresence>
             </div>
