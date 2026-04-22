@@ -7,7 +7,7 @@ import { PageLoader } from '@/components/ui/loaders';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { CartDrawer } from '@/components/cart/CartDrawer';
-import { Home } from '@/pages/Home';
+const Home = lazy(() => import('@/pages/Home').then(m => ({ default: m.Home })));
 
 // Lazy load other pages
 const Portfolio = lazy(() => import('@/pages/Portfolio').then(m => ({ default: m.Portfolio })));

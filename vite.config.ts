@@ -23,14 +23,20 @@ export default defineConfig(({mode}) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'babylon-vendor': ['@babylonjs/core', '@babylonjs/loaders'],
-            'ui-vendor': ['lucide-react', 'motion/react'],
-            'recharts-vendor': ['recharts'],
-          },
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('@babylonjs')) return 'babylon';
+              if (id.includes('recharts')) return 'recharts';
+              if (id.includes('lucide-react')) return 'ui-icons';
+              if (id.includes('motion')) return 'motion';
+              if (id.includes('@supabase')) return 'supabase';
+              if (id.includes('react-router-dom')) return 'router';
+              return 'vendor';
+            }
+          }
         },
       },
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 1500,
     },
   };
 });
