@@ -103,9 +103,9 @@ export function ContactSection() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-8 items-start">
+        <div className="grid lg:grid-cols-5 gap-8 items-start max-w-5xl mx-auto">
           {/* Info Cards */}
-          <div className="lg:col-span-2 grid gap-6 order-2 lg:order-1">
+          <div className="lg:col-span-2 grid gap-6 order-2 lg:order-1 w-full max-w-md mx-auto lg:max-w-none">
             {[
               { icon: MapPin, label: "Studio Location", val: "Lavington, Nairobi, Kenya", sub: "Available by appointment" },
               { icon: Mail, label: "Digital Reach", val: "studio@brendadesigns.com", sub: "24h Response Window" },
@@ -131,13 +131,13 @@ export function ContactSection() {
           </div>
 
           {/* Form Card */}
-          <div className="lg:col-span-3 order-1 lg:order-2">
-            <Card className="glass-panel border-black/5 rounded-2xl overflow-hidden relative shadow-2xl">
+          <div className="lg:col-span-3 order-1 lg:order-2 w-full max-w-xl mx-auto lg:max-w-none">
+            <Card className="glass-panel border-black/5 rounded-3xl overflow-hidden relative shadow-2xl">
               <div className="absolute top-0 right-0 p-8 opacity-5">
                 <MessageSquare className="w-40 h-40" />
               </div>
               
-              <CardContent className="p-8 md:p-12 space-y-10 relative z-10">
+              <CardContent className="p-6 md:p-12 space-y-8 md:space-y-10 relative z-10">
                 <AnimatePresence>
                   {isSuccess && (
                     <motion.div 

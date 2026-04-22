@@ -96,14 +96,14 @@ export function Home() {
         </section>
 
         {/* 3D Conceptual Design Section - Updated to Babylon.js */}
-        <section className="glass-card rounded-lg overflow-hidden p-12 md:p-20 relative">
+        <section className="glass-card rounded-3xl overflow-hidden p-6 md:p-20 relative mx-auto max-w-[95vw] md:max-w-none">
           <div className="absolute inset-0 bg-secondary/5 -z-10" />
           <div className="grid md:grid-cols-2 gap-10 md:gap-20 items-center">
-            <div className="space-y-8 relative z-10">
-              <Badge className="bg-secondary/10 text-secondary border-secondary/30 font-bold px-4 py-2 text-sm tracking-widest uppercase mb-4">
+            <div className="space-y-6 md:space-y-8 relative z-10 text-center md:text-left">
+              <Badge className="bg-secondary/10 text-secondary border-secondary/30 font-bold px-4 py-2 text-[10px] md:text-sm tracking-widest uppercase mb-4">
                 Artisanal Fiber Precision
               </Badge>
-              <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-[0.85] text-glow uppercase">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-[0.9] text-glow uppercase">
                 Designing in <span className="text-secondary italic">Every Stitch.</span>
               </h2>
               <p className="text-lg md:text-xl text-muted-foreground font-medium leading-relaxed max-w-lg">
@@ -144,11 +144,11 @@ export function Home() {
             </Link>
           </div>
 
-          <div className="grid md:grid-cols-12 gap-8 items-stretch">
+          <div className="grid lg:grid-cols-5 gap-8 items-start max-w-5xl mx-auto">
             {/* Main Showcase Item */}
             {mainFeatured ? (
               <motion.div 
-                className="md:col-span-7 glass-card kfc-card-accent group rounded-lg overflow-hidden flex flex-col pl-1.5"
+                className="lg:col-span-3 glass-card kfc-card-accent group rounded-lg overflow-hidden flex flex-col pl-1.5"
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -194,7 +194,7 @@ export function Home() {
 
             {/* Smaller Grid Column */}
             {sideFeatured.length > 0 && (
-              <div className="md:col-span-5 grid gap-8">
+              <div className="lg:col-span-2 grid gap-8">
                 {sideFeatured.map((item, i) => (
                   <motion.div 
                     key={i} 
@@ -204,8 +204,8 @@ export function Home() {
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.2 }}
                   >
-                    <div className="flex-1 flex flex-col md:flex-row">
-                      <div className="w-full md:w-1/2 aspect-square md:aspect-auto overflow-hidden relative">
+                    <div className="flex-1 flex flex-col">
+                      <div className="w-full aspect-square overflow-hidden relative">
                         <img 
                           src={item.image_urls?.[0] || item.image_url || ''} 
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
@@ -214,7 +214,7 @@ export function Home() {
                           loading="lazy"
                         />
                       </div>
-                      <div className="w-full md:w-1/2 p-10 flex flex-col justify-between space-y-6">
+                      <div className="w-full p-10 flex flex-col justify-between space-y-6">
                         <div className="space-y-2">
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">Featured</p>
                           <h4 className="font-bold text-foreground text-2xl tracking-tighter uppercase leading-tight">{item.name}</h4>
@@ -240,7 +240,7 @@ export function Home() {
         {/* Guest Nudge Section */}
         {!isCollector && (
           <section className="py-12 md:py-24 px-2 md:px-0">
-            <div className="glass-card rounded-3xl p-8 md:p-24 text-center space-y-8 md:space-y-12 relative overflow-hidden bg-black text-white">
+            <div className="glass-card rounded-3xl p-8 md:p-24 text-center space-y-8 md:space-y-12 relative overflow-hidden bg-black text-white max-w-5xl mx-auto">
               <div className="absolute inset-0 bg-gradient-to-br from-secondary/30 via-transparent to-transparent opacity-40 pointer-events-none" />
               
               {/* Visual Decorative Element */}

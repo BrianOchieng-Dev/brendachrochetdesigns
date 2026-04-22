@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const url = (import.meta as any).env.VITE_SUPABASE_URL;
-const key = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
+const url = import.meta.env.VITE_SUPABASE_URL;
+const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Check if configuration is valid
 export const isConfigured = !!(url && typeof url === 'string' && (url.startsWith('https://') || url.startsWith('http://'))) && !!(key && typeof key === 'string' && key.length > 0);
