@@ -453,7 +453,7 @@ export function Profile() {
 
           {/* Digital Twin Content */}
           <TabsContent value="TWIN" className="space-y-12 outline-none">
-            <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
               <div className="space-y-10">
                 <div className="space-y-4">
                   <h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-foreground uppercase leading-none">Measurement <span className="text-secondary italic">Profile</span></h2>
@@ -518,7 +518,7 @@ export function Profile() {
                 <Scissors className="w-32 h-32 text-secondary" />
               </div>
               
-              <div className="grid md:grid-cols-2 gap-16 relative z-10">
+              <div className="grid md:grid-cols-2 gap-8 md:gap-16 relative z-10">
                 <div className="space-y-12">
                   <div className="flex justify-between items-start">
                     <div className="space-y-2">
