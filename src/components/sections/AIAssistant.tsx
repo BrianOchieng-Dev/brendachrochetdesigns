@@ -4,13 +4,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Send, Sparkles, User, Bot, Loader2, Minimize2, Maximize2, Eraser, Quote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { GoogleGenAI } from '@google/genai';
 import { toast } from 'sonner';
 
-// Unified SDK Initialization
-const genAI = new GoogleGenAI({
-  apiKey: import.meta.env.VITE_GEMINI_API_KEY || ''
-});
+// OpenAI API Configuration (Using fetch to avoid extra dependencies)
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
 const SYSTEM_PROMPT = `
 You are the "Studio Intelligence" for Brenda Crochet Designs. 
@@ -66,51 +63,38 @@ export function AIAssistant() {
     setIsLoading(true);
 
     try {
-      if (!import.meta.env.VITE_GEMINI_API_KEY) throw new Error("API Key Missing");
-
-      try {
-        const response = await genAI.models.generateContent({
-          model: 'gemini-1.5-flash-latest',
-          contents: newMessages.map(m => ({
-            role: m.role === 'user' ? 'user' : 'model',
-            parts: [{ text: m.content }]
-          })),
-          config: {
-            systemInstruction: SYSTEM_PROMPT
-          }
-        });
-        const aiText = response.text || "I am processing the studio archives...";
-        setMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
-      } catch (geminiError) {
-        console.warn('Gemini failed, attempting OpenAI fallback...', geminiError);
-        
-        const openAIKey = import.meta.env.VITE_OPENAI_API_KEY;
-        if (!openAIKey) throw geminiError;
-
-        const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${openAIKey}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-              { role: 'system', content: SYSTEM_PROMPT },
-              ...newMessages.map(m => ({
-                role: m.role === 'user' ? 'user' : 'assistant',
-                content: m.content
-              }))
-            ]
-          })
-        });
-
-        if (!openAIResponse.ok) throw new Error(`OpenAI API error: ${openAIResponse.statusText}`);
-        
-        const data = await openAIResponse.json();
-        const aiText = data.choices[0].message.content;
-        setMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
+      if (!OPENAI_API_KEY) {
+        toast.error("OpenAI API Key Missing in .env");
+        setIsLoading(false);
+        return;
       }
+
+      const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            ...newMessages.map(m => ({
+              role: m.role === 'user' ? 'user' : 'assistant',
+              content: m.content
+            }))
+          ]
+        })
+      });
+
+      if (!openAIResponse.ok) {
+        const errorData = await openAIResponse.json();
+        throw new Error(errorData.error?.message || openAIResponse.statusText);
+      }
+      
+      const data = await openAIResponse.json();
+      const aiText = data.choices[0].message.content;
+      setMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
     } catch (error) {
       console.error('AI error:', error);
       toast.error("Studio Intelligence link interrupted.");
