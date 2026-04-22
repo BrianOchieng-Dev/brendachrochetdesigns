@@ -180,8 +180,8 @@ export function Home() {
                     </div>
                   </div>
                   <Link to={`/shop`}>
-                    <Button className="w-full rounded-full border border-secondary/30 glass-interactive hover:bg-secondary text-secondary hover:text-white h-16 md:h-20 font-bold text-xl md:text-2xl group shadow-sm hover:shadow-secondary/20 transition-all uppercase tracking-widest gap-4">
-                      Secure This Piece <ArrowRight className="w-6 h-6 group-hover:translate-x-3 transition-transform" />
+                    <Button className="w-full rounded-full border border-secondary/30 glass-interactive hover:bg-secondary text-secondary hover:text-white h-14 md:h-20 font-bold text-base md:text-2xl group shadow-sm hover:shadow-secondary/20 transition-all uppercase tracking-widest gap-2 md:gap-4 px-4 md:px-8">
+                      Secure This Piece <ArrowRight className="w-5 h-5 md:w-6 h-6 group-hover:translate-x-3 transition-transform" />
                     </Button>
                   </Link>
                 </div>
@@ -254,7 +254,7 @@ export function Home() {
                 </p>
                 <div className="pt-8">
                   <Link to="/auth">
-                    <Button className="rounded-full bg-white text-black hover:bg-white/90 h-16 px-12 font-bold text-xl shadow-[0_0_40px_rgba(255,255,255,0.2)]">
+                    <Button className="w-full md:w-auto rounded-full bg-white text-black hover:bg-white/90 h-14 md:h-16 px-6 md:px-12 font-bold text-base md:text-xl shadow-[0_0_40px_rgba(255,255,255,0.2)]">
                       Create Your Studio Profile
                     </Button>
                   </Link>

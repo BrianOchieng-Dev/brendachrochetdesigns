@@ -1298,9 +1298,9 @@ export function Admin() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 md:p-10 bg-black/40 backdrop-blur-3xl overflow-y-auto"
+              className="fixed inset-0 z-[100] flex items-start md:items-center justify-center p-2 md:p-6 bg-black/40 backdrop-blur-3xl overflow-y-auto"
             >
-              <div className="glass-panel p-6 md:p-16 rounded-lg max-w-4xl w-full border-white/10 space-y-12 relative bg-white/90 shadow-2xl my-auto">
+              <div className="glass-panel p-6 md:p-16 rounded-2xl max-w-4xl w-full border-white/10 space-y-8 md:space-y-12 relative bg-white/90 shadow-2xl my-8 md:my-auto">
                 <div className="flex justify-between items-start">
                   <div className="space-y-4">
                     <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground uppercase leading-none">
@@ -1317,7 +1317,7 @@ export function Admin() {
                   </Button>
                 </div>
 
-                <form onSubmit={handleSavePortfolio} className="grid lg:grid-cols-2 gap-6 p-4 md:p-12">
+                <form onSubmit={handleSavePortfolio} className="grid lg:grid-cols-2 gap-6 md:gap-12">
                   <div className="space-y-8">
                     <div className="space-y-3">
                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Project Title</label>
@@ -1400,9 +1400,9 @@ export function Admin() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 md:p-10 bg-black/40 backdrop-blur-3xl overflow-y-auto"
+              className="fixed inset-0 z-[100] flex items-start md:items-center justify-center p-2 md:p-6 bg-black/40 backdrop-blur-3xl overflow-y-auto"
             >
-              <div className="glass-panel p-6 md:p-16 rounded-lg max-w-2xl w-full border-white/10 space-y-12 relative bg-white/90 shadow-2xl my-auto">
+              <div className="glass-panel p-6 md:p-16 rounded-2xl max-w-2xl w-full border-white/10 space-y-8 md:space-y-12 relative bg-white/90 shadow-2xl my-8 md:my-auto">
                 <div className="flex justify-between items-start">
                   <div className="space-y-4">
                     <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground uppercase leading-none italic">
