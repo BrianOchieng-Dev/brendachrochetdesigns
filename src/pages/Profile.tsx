@@ -196,11 +196,11 @@ export function Profile() {
 
 
   return (
-    <div className="pt-32 pb-20 px-6 bg-background min-h-screen">
+    <div className="pt-24 md:pt-32 pb-20 px-4 md:px-6 bg-background min-h-screen">
       <div className="max-w-6xl mx-auto space-y-12">
 
         {/* Profile Header */}
-        <section className="relative glass-card rounded-lg p-8 md:p-12 overflow-hidden">
+        <section className="relative glass-card rounded-lg p-6 md:p-12 overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-secondary/5 blur-[100px] rounded-full -mr-32 -mt-32" />
           
           <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
@@ -309,7 +309,7 @@ export function Profile() {
           <TabsContent value="OVERVIEW" className="grid lg:grid-cols-3 gap-8 outline-none">
             {/* Recent Notifications */}
             <div className="lg:col-span-2 space-y-8">
-              <Card className="glass-card rounded-lg p-8 border-black/5 bg-white/30 backdrop-blur-3xl overflow-hidden">
+              <Card className="glass-card rounded-lg p-6 md:p-8 border-black/5 bg-white/30 backdrop-blur-3xl overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between p-0 mb-8">
                   <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
                     <Bell className="w-6 h-6 text-secondary" /> Digital Pulse
@@ -344,7 +344,7 @@ export function Profile() {
               </Card>
 
               {/* Recent Activity */}
-              <Card className="glass-card rounded-lg p-8 border-black/5 bg-white/30 backdrop-blur-3xl">
+              <Card className="glass-card rounded-lg p-6 md:p-8 border-black/5 bg-white/30 backdrop-blur-3xl">
                 <CardHeader className="flex flex-row items-center justify-between p-0 mb-8">
                   <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
                     <History className="w-6 h-6 text-secondary" /> Activity Log
@@ -358,7 +358,7 @@ export function Profile() {
 
             {/* Sidebar Overview */}
             <div className="space-y-8">
-              <Card className="glass-card rounded-lg p-8 border-black/5 bg-secondary/5 border-secondary/10">
+              <Card className="glass-card rounded-lg p-6 md:p-8 border-black/5 bg-secondary/5 border-secondary/10">
                 <CardTitle className="text-lg font-bold uppercase tracking-widest mb-6 flex items-center gap-3">
                   <Crown className="w-5 h-5 text-secondary" /> Brand Status
                 </CardTitle>

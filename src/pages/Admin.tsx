@@ -577,7 +577,7 @@ export function Admin() {
   };
 
   return (
-    <div className="pt-32 pb-20 px-6 bg-background min-h-screen">
+    <div className="pt-24 md:pt-32 pb-20 px-4 md:px-6 bg-background min-h-screen">
       <div className="max-w-7xl mx-auto space-y-12">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-3">
@@ -644,8 +644,8 @@ export function Admin() {
               ))}
             </div>
 
-             <div className="grid lg:grid-cols-1 gap-8">
-              <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-8">
+             <div className="grid grid-cols-1 gap-8">
+              <Card className="glass-panel border-black/5 rounded-lg p-6 md:p-10 space-y-8">
                 <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
                   <Globe className="w-6 h-6 text-secondary" /> Global Feed
                 </CardTitle>
@@ -670,10 +670,10 @@ export function Admin() {
             </div>
           </TabsContent>
 
-          <TabsContent value="CUSTOMERS" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 outline-none">
+          <TabsContent value="CUSTOMERS" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 outline-none">
             {/* 1. Customer Management Sections */}
             <AuthGate authority="TIER_AUTHORITY">
-              <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+              <Card className="glass-panel border-black/5 rounded-lg p-6 md:p-10 space-y-6">
                 <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
                   <Crown className="w-8 h-8 text-secondary" />
                 </div>
@@ -690,7 +690,7 @@ export function Admin() {
             </AuthGate>
 
             <AuthGate authority="MEASUREMENT_CUSTODIAN">
-               <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+               <Card className="glass-panel border-black/5 rounded-lg p-6 md:p-10 space-y-6">
                 <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
                   <Ruler className="w-8 h-8 text-secondary" />
                 </div>
@@ -706,7 +706,7 @@ export function Admin() {
             </AuthGate>
 
             <AuthGate authority="COMMISSION_FACILITATOR">
-              <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+              <Card className="glass-panel border-black/5 rounded-lg p-6 md:p-10 space-y-6">
                 <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
                   <Layers className="w-8 h-8 text-secondary" />
                 </div>
@@ -823,7 +823,7 @@ export function Admin() {
               <CardContent className="p-0">
                 <div className="divide-y divide-black/5">
                   {inquiries.length === 0 ? (
-                    <div className="p-10 md:p-20 text-center text-muted-foreground italic text-sm md:text-base">No inquiries recorded in the studio ledger.</div>
+                    <div className="p-6 md:p-20 text-center text-muted-foreground italic text-sm md:text-base">No inquiries recorded in the studio ledger.</div>
                   ) : (
                     inquiries.map((inquiry) => (
                       <div key={inquiry.id} className="p-6 md:p-10 hover:bg-black/[0.01] transition-all flex flex-col md:grid md:grid-cols-4 gap-6 md:gap-8 items-start">
@@ -900,7 +900,7 @@ export function Admin() {
             {/* Action Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <AuthGate authority="DROP_COORDINATOR">
-                <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+                <Card className="glass-panel border-black/5 rounded-lg p-6 md:p-10 space-y-6">
                   <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
                     <Package className="w-8 h-8 text-secondary" />
                   </div>
@@ -919,7 +919,7 @@ export function Admin() {
               </AuthGate>
 
               <AuthGate authority="STORYTELLING_LEAD">
-                <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+                <Card className="glass-panel border-black/5 rounded-lg p-6 md:p-10 space-y-6">
                   <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
                     <Palette className="w-8 h-8 text-secondary" />
                   </div>
@@ -939,7 +939,7 @@ export function Admin() {
               </AuthGate>
 
               <AuthGate authority="STORYTELLING_LEAD">
-                <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+                <Card className="glass-panel border-black/5 rounded-lg p-6 md:p-10 space-y-6">
                   <h3 className="text-2xl font-bold uppercase tracking-tight">Narrative Specs</h3>
                   <p className="text-sm text-muted-foreground font-medium italic">Update the studio's craftsmanship philosophies.</p>
                   <Button 
@@ -964,7 +964,7 @@ export function Admin() {
                 <CardContent className="p-0">
                   <div className="divide-y divide-black/5">
                     {products.length === 0 ? (
-                      <div className="p-10 md:p-20 text-center italic text-muted-foreground text-sm">No designs archived.</div>
+                      <div className="p-6 md:p-20 text-center italic text-muted-foreground text-sm">No designs archived.</div>
                     ) : (
                       products.map((product) => (
                         <div key={product.id} className="p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:bg-black/[0.01] transition-all">
@@ -1021,7 +1021,7 @@ export function Admin() {
                 <CardContent className="p-0">
                   <div className="divide-y divide-black/5">
                     {portfolio.length === 0 ? (
-                      <div className="p-10 md:p-20 text-center italic text-muted-foreground text-sm">No artistic milestones curated.</div>
+                      <div className="p-6 md:p-20 text-center italic text-muted-foreground text-sm">No artistic milestones curated.</div>
                     ) : (
                       portfolio.map((item) => (
                         <div key={item.id} className="p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:bg-black/[0.01] transition-all">
@@ -1067,7 +1067,7 @@ export function Admin() {
           <TabsContent value="PHILOSOPHY" className="space-y-12 outline-none">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <AuthGate authority="STORYTELLING_LEAD">
-                <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+                <Card className="glass-panel border-black/5 rounded-lg p-6 md:p-10 space-y-6">
                   <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
                     <Sparkles className="w-8 h-8 text-secondary" />
                   </div>
@@ -1086,7 +1086,7 @@ export function Admin() {
               </AuthGate>
 
               <AuthGate authority="TECHNICAL_AUDITOR">
-                <Card className="glass-panel border-black/5 rounded-lg p-10 space-y-6">
+                <Card className="glass-panel border-black/5 rounded-lg p-6 md:p-10 space-y-6">
                   <div className="p-4 bg-secondary/10 rounded-lg w-fit mb-4">
                     <ShieldCheck className="w-8 h-8 text-secondary" />
                   </div>
@@ -1110,7 +1110,7 @@ export function Admin() {
                 <CardContent className="p-0">
                   <div className="divide-y divide-black/5">
                     {philosophies.length === 0 ? (
-                      <div className="p-10 md:p-20 text-center italic text-muted-foreground text-sm">No philosophies documented in the studio archive.</div>
+                      <div className="p-6 md:p-20 text-center italic text-muted-foreground text-sm">No philosophies documented in the studio archive.</div>
                     ) : (
                       philosophies.map((phil) => (
                         <div key={phil.id} className="p-6 md:p-10 hover:bg-black/[0.01] transition-all flex flex-col md:grid md:grid-cols-4 gap-6 md:gap-8 items-start md:items-center">
@@ -1160,7 +1160,7 @@ export function Admin() {
           </TabsContent>
 
           <TabsContent value="TECHNICAL" className="space-y-12 outline-none">
-             <Card className="rounded-lg p-12 bg-black text-white relative overflow-hidden border-white/5 shadow-2xl">
+             <Card className="rounded-lg p-6 p-4 md:p-12 bg-black text-white relative overflow-hidden border-white/5 shadow-2xl">
                 <div className="absolute top-0 right-0 p-20 opacity-20">
                    <Lock className="w-64 h-64 text-white" />
                 </div>
@@ -1186,9 +1186,9 @@ export function Admin() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-black/40 backdrop-blur-3xl overflow-y-auto"
+              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 md:p-10 bg-black/40 backdrop-blur-3xl overflow-y-auto"
             >
-              <div className="glass-panel p-8 md:p-16 rounded-lg max-w-4xl w-full border-white/10 space-y-12 relative bg-white/90 shadow-2xl my-auto">
+              <div className="glass-panel p-6 md:p-16 rounded-lg max-w-4xl w-full border-white/10 space-y-12 relative bg-white/90 shadow-2xl my-auto">
                 <div className="flex justify-between items-start">
                   <div className="space-y-4">
                     <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground uppercase">{editingProduct ? 'Refine Concept' : 'Initiate Drop'}</h2>
@@ -1199,7 +1199,7 @@ export function Admin() {
                   </Button>
                 </div>
 
-                <form onSubmit={handleSaveProduct} className="grid lg:grid-cols-2 gap-12">
+                <form onSubmit={handleSaveProduct} className="grid lg:grid-cols-2 gap-6 p-4 md:p-12">
                   <div className="space-y-8">
                     <div className="space-y-3">
                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Design Identity</label>
@@ -1298,9 +1298,9 @@ export function Admin() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-black/40 backdrop-blur-3xl overflow-y-auto"
+              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 md:p-10 bg-black/40 backdrop-blur-3xl overflow-y-auto"
             >
-              <div className="glass-panel p-8 md:p-16 rounded-lg max-w-4xl w-full border-white/10 space-y-12 relative bg-white/90 shadow-2xl my-auto">
+              <div className="glass-panel p-6 md:p-16 rounded-lg max-w-4xl w-full border-white/10 space-y-12 relative bg-white/90 shadow-2xl my-auto">
                 <div className="flex justify-between items-start">
                   <div className="space-y-4">
                     <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground uppercase leading-none">
@@ -1317,7 +1317,7 @@ export function Admin() {
                   </Button>
                 </div>
 
-                <form onSubmit={handleSavePortfolio} className="grid lg:grid-cols-2 gap-12">
+                <form onSubmit={handleSavePortfolio} className="grid lg:grid-cols-2 gap-6 p-4 md:p-12">
                   <div className="space-y-8">
                     <div className="space-y-3">
                       <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Project Title</label>
@@ -1400,9 +1400,9 @@ export function Admin() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-black/40 backdrop-blur-3xl overflow-y-auto"
+              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 md:p-10 bg-black/40 backdrop-blur-3xl overflow-y-auto"
             >
-              <div className="glass-panel p-8 md:p-16 rounded-lg max-w-2xl w-full border-white/10 space-y-12 relative bg-white/90 shadow-2xl my-auto">
+              <div className="glass-panel p-6 md:p-16 rounded-lg max-w-2xl w-full border-white/10 space-y-12 relative bg-white/90 shadow-2xl my-auto">
                 <div className="flex justify-between items-start">
                   <div className="space-y-4">
                     <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground uppercase leading-none italic">
