@@ -395,8 +395,12 @@ export function Admin() {
     }
   }
 
-  async function handleResolveInquiry(id: string, customerId?: string) {
-    if (!isConfigured || !adminResponse) return;
+  async function handleResolveInquiry(id: string, userId?: string) {
+    if (!isConfigured) return;
+    if (!adminResponse.trim()) {
+      toast.error('Response cannot be empty');
+      return;
+    }
 
     try {
       const { error } = await supabase.from('inquiries').update({ 
@@ -407,10 +411,10 @@ export function Admin() {
       
       if (error) throw error;
 
-      // Create notification for the customer if ID exists
-      if (customerId) {
+      // Create notification for the user if ID exists
+      if (userId) {
         await supabase.from('notifications').insert([{
-          user_id: customerId,
+          user_id: userId,
           title: 'Studio Response Received',
           message: 'The Studio Maestro has responded to your inquiry regarding artisanal craftsmanship.',
           type: 'INQUIRY'
@@ -855,7 +859,7 @@ export function Admin() {
                                   <div className="flex gap-2">
                                     <Button 
                                       size="sm"
-                                      onClick={() => handleResolveInquiry(inquiry.id, (inquiry as any).customer_id)}
+                                      onClick={() => handleResolveInquiry(inquiry.id, inquiry.user_id)}
                                       className="flex-1 rounded-full bg-secondary text-white font-bold uppercase text-[9px] tracking-widest h-10"
                                     >
                                       Dispatch

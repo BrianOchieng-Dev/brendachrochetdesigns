@@ -19,6 +19,11 @@
   --color-glass-white: rgba(255, 255, 255, 0.03);
   --color-glass-border: rgba(0, 0, 0, 0.08);
   --color-glass-highlight: rgba(255, 255, 255, 0.8);
+  /* Button Dimensions */
+  --btn-height-default: 44px;
+  --btn-height-sm: 40px;
+  --btn-height-lg: 56px;
+  --btn-height-xl: 64px;
 }
 
 @layer base {
@@ -185,6 +190,10 @@
     --input: oklch(0.2 0.02 0 / 15%);
     --ring: oklch(0.55 0.25 260);
     --radius: 1.5rem;
+    --btn-height-default: 2.75rem;
+    --btn-height-sm: 2.5rem;
+    --btn-height-lg: 3.5rem;
+    --btn-height-xl: 4rem;
 }
 
 @layer base {

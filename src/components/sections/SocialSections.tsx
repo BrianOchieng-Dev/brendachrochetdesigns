@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, Send, MapPin, Phone, Mail, Instagram, Facebook, Twitter, MessageCircle, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { supabase, isConfigured } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 
 
 export function WhatsAppFloat() {
@@ -27,14 +28,26 @@ export function WhatsAppFloat() {
 }
 
 export function ContactSection() {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    name: user?.user_metadata?.full_name || '',
+    email: user?.email || '',
     message: ''
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Update form if user logs in/out while on page
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || user.user_metadata?.full_name || '',
+        email: prev.email || user.email || ''
+      }));
+    }
+  }, [user]);
 
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
@@ -71,7 +84,8 @@ export function ContactSection() {
         customer_name: formData.name,
         customer_email: formData.email,
         message: formData.message,
-        status: 'PENDING'
+        status: 'PENDING',
+        user_id: user?.id // Link to user account if available
       }]);
       if (error) throw error;
       
