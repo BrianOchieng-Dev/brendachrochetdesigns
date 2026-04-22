@@ -239,22 +239,31 @@ export function Home() {
 
         {/* Guest Nudge Section */}
         {!isCollector && (
-          <section className="py-24">
-            <div className="glass-card rounded-lg p-12 md:p-24 text-center space-y-10 relative overflow-hidden bg-black text-white">
-              <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 via-transparent to-transparent opacity-50" />
-              <div className="relative z-10 space-y-6">
-                <Badge className="bg-secondary text-white border-none font-bold px-4 py-2 text-xs tracking-widest uppercase mb-4">
-                  Collector Program
-                </Badge>
-                <h2 className="text-4xl md:text-7xl font-bold tracking-tighter leading-none uppercase italic">
-                  From Window Shopper<br />to <span className="text-secondary not-italic">Digital Collector.</span>
-                </h2>
-                <p className="text-xl text-white/60 font-medium italic max-w-2xl mx-auto">
-                  Unlock the "Virtual Closet," store your Measurement Profile, and track your handcrafted pieces stitch-by-stitch.
+          <section className="py-12 md:py-24 px-2 md:px-0">
+            <div className="glass-card rounded-3xl p-8 md:p-24 text-center space-y-8 md:space-y-12 relative overflow-hidden bg-black text-white">
+              <div className="absolute inset-0 bg-gradient-to-br from-secondary/30 via-transparent to-transparent opacity-40 pointer-events-none" />
+              
+              {/* Visual Decorative Element */}
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-secondary/10 blur-[100px] rounded-full" />
+              <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-white/5 blur-[100px] rounded-full" />
+
+              <div className="relative z-10 space-y-6 md:space-y-10">
+                <div className="space-y-4">
+                  <Badge className="bg-secondary text-white border-none font-bold px-4 py-1.5 text-[10px] md:text-xs tracking-[0.2em] uppercase">
+                    Collector Program
+                  </Badge>
+                  <h2 className="text-3xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.85] uppercase italic">
+                    From Window Shopper<br className="hidden md:block" /> to <span className="text-secondary not-italic">Digital Collector.</span>
+                  </h2>
+                </div>
+                
+                <p className="text-base md:text-2xl text-white/60 font-medium italic max-w-2xl mx-auto leading-relaxed px-2">
+                  Unlock the "Virtual Closet," store your Measurement Profile, and track your handcrafted pieces stitch-by-stitch in our exclusive member studio.
                 </p>
-                <div className="pt-8">
-                  <Link to="/auth">
-                    <Button className="w-full md:w-auto rounded-full bg-white text-black hover:bg-white/90 h-14 md:h-16 px-6 md:px-12 font-bold text-base md:text-xl shadow-[0_0_40px_rgba(255,255,255,0.2)]">
+
+                <div className="pt-6 md:pt-10">
+                  <Link to="/auth" className="block md:inline-block">
+                    <Button className="w-full md:w-auto rounded-full bg-white text-black hover:bg-white/90 h-16 md:h-24 px-8 md:px-20 font-black text-lg md:text-3xl shadow-[0_0_60px_rgba(255,255,255,0.1)] transition-all hover:scale-[1.02] active:scale-[0.98] uppercase tracking-tighter">
                       Create Your Studio Profile
                     </Button>
                   </Link>
