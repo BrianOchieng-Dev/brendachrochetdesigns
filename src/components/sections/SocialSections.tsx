@@ -102,9 +102,9 @@ export function ContactSection() {
   };
 
   return (
-    <section className="py-24 max-w-7xl mx-auto px-6" id="contact">
-      <div className="glass-card border-black/5 rounded-lg overflow-hidden grid lg:grid-cols-2">
-        <div className="p-12 md:p-20 space-y-12">
+    <section className="py-12 md:py-24 max-w-7xl mx-auto px-6" id="contact">
+      <div className="glass-card border-black/5 rounded-lg overflow-hidden grid md:grid-cols-2">
+        <div className="p-8 md:p-20 space-y-12">
           <div className="space-y-4">
             <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tighter text-glow text-foreground leading-[0.85] uppercase">
               Begin a<br />Conversation
@@ -148,7 +148,7 @@ export function ContactSection() {
           </div>
         </div>
 
-        <div className="bg-black/5 p-12 md:p-20 flex flex-col justify-center border-l border-black/5 relative">
+        <div className="bg-black/5 p-8 md:p-20 flex flex-col justify-center border-t md:border-t-0 md:border-l border-black/5 relative">
           <AnimatePresence>
             {isSuccess ? (
               <motion.div 

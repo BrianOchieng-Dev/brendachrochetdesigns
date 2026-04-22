@@ -98,7 +98,7 @@ export function Home() {
         {/* 3D Conceptual Design Section - Updated to Babylon.js */}
         <section className="glass-card rounded-lg overflow-hidden p-12 md:p-20 relative">
           <div className="absolute inset-0 bg-secondary/5 -z-10" />
-          <div className="grid md:grid-cols-2 gap-20 items-center">
+          <div className="grid md:grid-cols-2 gap-10 md:gap-20 items-center">
             <div className="space-y-8 relative z-10">
               <Badge className="bg-secondary/10 text-secondary border-secondary/30 font-bold px-4 py-2 text-sm tracking-widest uppercase mb-4">
                 Artisanal Fiber Precision
@@ -109,17 +109,17 @@ export function Home() {
               <p className="text-lg md:text-xl text-muted-foreground font-medium leading-relaxed max-w-lg">
                 Brenda's designs are visualized with high-density "Yarn Particle" systems and clustered lighting to showcase the intricate, unique texture of every fiber interaction.
               </p>
-              <div className="flex gap-6">
-                <Button className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-14 px-10 font-bold text-lg shadow-[0_10px_25px_rgba(255,0,0,0.2)]">
+              <div className="flex flex-wrap gap-4 md:gap-6">
+                <Button className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-14 px-10 font-bold text-lg shadow-[0_10px_25px_rgba(255,0,0,0.2)] flex-1 md:flex-none">
                   Explore Fiber Math
                 </Button>
-                <Button variant="outline" className="rounded-full border-black/10 glass-panel hover:bg-black/5 h-14 px-10 font-bold text-lg text-foreground">
+                <Button variant="outline" className="rounded-full border-black/10 glass-panel hover:bg-black/5 h-14 px-10 font-bold text-lg text-foreground flex-1 md:flex-none">
                   View Source Mode
                 </Button>
               </div>
             </div>
             
-            <div className="h-[500px] md:h-[600px] relative rounded-lg overflow-hidden bg-black/5 backdrop-blur-sm">
+            <div className="h-[350px] md:h-[600px] relative rounded-lg overflow-hidden bg-black/5 backdrop-blur-sm">
               <div className="absolute inset-0 bg-secondary/10 blur-[120px] rounded-full animate-pulse" />
               <BabylonCrochetViewer />
             </div>

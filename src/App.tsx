@@ -2,7 +2,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
-import { useState, useEffect, ReactNode, lazy, Suspense } from 'react';
+import { ReactNode, lazy, Suspense } from 'react';
 import { PageLoader } from '@/components/ui/loaders';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
@@ -39,16 +39,6 @@ function AdminRoute({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate initial brand load
-    const timer = setTimeout(() => setIsInitialLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isInitialLoading) return <PageLoader />;
-
   return (
     <AuthProvider>
       <CartProvider>

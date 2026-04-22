@@ -607,7 +607,7 @@ export function Admin() {
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-10">
-          <TabsList className="glass-panel p-2 rounded-full gap-2 border-black/5 h-16 bg-white/40 mb-10 w-full md:w-fit mx-auto md:mx-0 overflow-x-auto overflow-y-hidden">
+          <TabsList className="glass-panel p-2 rounded-full gap-2 border-black/5 h-16 bg-white/40 mb-10 w-full md:w-fit mx-auto md:mx-0 flex overflow-x-auto overflow-y-hidden scrollbar-hide no-scrollbar">
             <TabsTrigger value="OVERVIEW" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Overview</TabsTrigger>
             <TabsTrigger value="CUSTOMERS" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Collective</TabsTrigger>
             <TabsTrigger value="CONTENT" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Materiality</TabsTrigger>
@@ -626,7 +626,7 @@ export function Admin() {
                 { label: 'Studio Stability', value: stats.stability, icon: ShieldCheck, change: 'Optimal' },
               ].map((stat) => (
                 <Card key={stat.label} className="glass-panel kfc-card-accent border-black/5 rounded-lg overflow-hidden group pl-1.5 transition-all duration-300 hover:shadow-xl">
-                  <CardContent className="p-8 space-y-6">
+                  <CardContent className="p-6 md:p-8 space-y-6">
                     <div className="flex justify-between items-start">
                       <div className="p-4 bg-secondary/10 rounded-md border border-secondary/20 group-hover:scale-110 transition-transform">
                         <stat.icon className="w-6 h-6 text-secondary" />
@@ -747,7 +747,7 @@ export function Admin() {
 
             <AuthGate authority="ACCOUNT_OVERSIGHT">
               <Card className="lg:col-span-3 glass-panel border-black/5 rounded-lg overflow-hidden">
-                <CardHeader className="border-b border-black/5 bg-black/[0.02] p-10 flex flex-row items-center justify-between">
+                <CardHeader className="border-b border-black/5 bg-black/[0.02] p-6 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                   <CardTitle className="text-xl font-bold flex items-center gap-4 text-foreground uppercase tracking-widest">
                     <UserCheck className="w-7 h-7 text-secondary" /> Studio Personnel & Collective
                   </CardTitle>
@@ -812,7 +812,7 @@ export function Admin() {
 
           <TabsContent value="INQUIRIES" className="space-y-8 outline-none">
             <Card className="glass-panel border-black/5 rounded-lg overflow-hidden">
-              <CardHeader className="p-10 border-b border-black/5 flex flex-row items-center justify-between">
+              <CardHeader className="p-6 md:p-10 border-b border-black/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
                   <MessageSquare className="w-7 h-7 text-secondary" /> Customer Dialogue
                 </CardTitle>
@@ -823,11 +823,11 @@ export function Admin() {
               <CardContent className="p-0">
                 <div className="divide-y divide-black/5">
                   {inquiries.length === 0 ? (
-                    <div className="p-20 text-center text-muted-foreground italic">No inquiries recorded in the studio ledger.</div>
+                    <div className="p-10 md:p-20 text-center text-muted-foreground italic text-sm md:text-base">No inquiries recorded in the studio ledger.</div>
                   ) : (
                     inquiries.map((inquiry) => (
-                      <div key={inquiry.id} className="p-10 hover:bg-black/[0.01] transition-all grid md:grid-cols-4 gap-8 items-start">
-                        <div className="md:col-span-1 space-y-2">
+                      <div key={inquiry.id} className="p-6 md:p-10 hover:bg-black/[0.01] transition-all flex flex-col md:grid md:grid-cols-4 gap-6 md:gap-8 items-start">
+                        <div className="w-full md:col-span-1 space-y-2">
                           <p className="font-bold text-lg text-foreground uppercase tracking-tight leading-none">{inquiry.customer_name}</p>
                           <p className="text-sm font-medium text-muted-foreground italic truncate">{inquiry.customer_email}</p>
                           <Badge className={inquiry.status === 'PENDING' ? 'bg-secondary text-white' : 'bg-green-500/10 text-green-500 border-green-500/20'}>
@@ -839,13 +839,13 @@ export function Admin() {
                             <p className="text-foreground font-medium leading-relaxed italic">"{inquiry.message}"</p>
                           </div>
                           {inquiry.response && (
-                            <div className="p-6 bg-secondary/5 rounded-md border border-secondary/10 ml-6">
+                            <div className="p-4 md:p-6 bg-secondary/5 rounded-md border border-secondary/10 ml-4 md:ml-6">
                               <p className="text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">Studio Response:</p>
-                              <p className="text-foreground/80 font-medium italic">"{inquiry.response}"</p>
+                              <p className="text-foreground/80 font-medium italic text-sm md:text-base">"{inquiry.response}"</p>
                             </div>
                           )}
                         </div>
-                        <div className="md:col-span-1 flex flex-col justify-end gap-3">
+                        <div className="w-full md:col-span-1 flex flex-col justify-end gap-3">
                           {inquiry.status === 'PENDING' && (
                             <>
                               {respondingToInquiry === inquiry.id ? (
@@ -956,7 +956,7 @@ export function Admin() {
             {/* Designs Management List */}
             <AuthGate authority="DROP_COORDINATOR">
               <Card className="glass-panel border-black/5 rounded-lg overflow-hidden">
-                <CardHeader className="p-10 border-b border-black/5 bg-black/[0.02]">
+                <CardHeader className="p-6 md:p-10 border-b border-black/5 bg-black/[0.02]">
                   <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
                     <Package className="w-7 h-7 text-secondary" /> Commercial Designs Ledger
                   </CardTitle>
@@ -964,10 +964,10 @@ export function Admin() {
                 <CardContent className="p-0">
                   <div className="divide-y divide-black/5">
                     {products.length === 0 ? (
-                      <div className="p-20 text-center italic text-muted-foreground">No designs archived.</div>
+                      <div className="p-10 md:p-20 text-center italic text-muted-foreground text-sm">No designs archived.</div>
                     ) : (
                       products.map((product) => (
-                        <div key={product.id} className="p-8 flex items-center justify-between hover:bg-black/[0.01] transition-all">
+                        <div key={product.id} className="p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:bg-black/[0.01] transition-all">
                           <div className="flex items-center gap-6">
                             <div className="w-20 h-24 rounded-lg bg-black/5 overflow-hidden border border-black/5 flex-shrink-0">
                               <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
@@ -1013,7 +1013,7 @@ export function Admin() {
             {/* Portfolio Management List */}
             <AuthGate authority="STORYTELLING_LEAD">
               <Card className="glass-panel border-black/5 rounded-lg overflow-hidden">
-                <CardHeader className="p-10 border-b border-black/5 bg-black/[0.02]">
+                <CardHeader className="p-6 md:p-10 border-b border-black/5 bg-black/[0.02]">
                   <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
                     <Palette className="w-7 h-7 text-secondary" /> Portfolio Milestones
                   </CardTitle>
@@ -1021,10 +1021,10 @@ export function Admin() {
                 <CardContent className="p-0">
                   <div className="divide-y divide-black/5">
                     {portfolio.length === 0 ? (
-                      <div className="p-20 text-center italic text-muted-foreground">No artistic milestones curated.</div>
+                      <div className="p-10 md:p-20 text-center italic text-muted-foreground text-sm">No artistic milestones curated.</div>
                     ) : (
                       portfolio.map((item) => (
-                        <div key={item.id} className="p-8 flex items-center justify-between hover:bg-black/[0.01] transition-all">
+                        <div key={item.id} className="p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:bg-black/[0.01] transition-all">
                           <div className="flex items-center gap-6">
                             <div className="w-24 h-24 rounded-md bg-black/5 overflow-hidden border border-black/5 flex-shrink-0">
                               <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
@@ -1102,7 +1102,7 @@ export function Admin() {
 
             <AuthGate authority="STORYTELLING_LEAD">
               <Card className="glass-panel border-black/5 rounded-lg overflow-hidden">
-                <CardHeader className="p-10 border-b border-black/5 bg-black/[0.02]">
+                <CardHeader className="p-6 md:p-10 border-b border-black/5 bg-black/[0.02]">
                   <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
                     <Sparkles className="w-7 h-7 text-secondary" /> Philosophical Ledger
                   </CardTitle>
@@ -1110,11 +1110,11 @@ export function Admin() {
                 <CardContent className="p-0">
                   <div className="divide-y divide-black/5">
                     {philosophies.length === 0 ? (
-                      <div className="p-20 text-center italic text-muted-foreground">No philosophies documented in the studio archive.</div>
+                      <div className="p-10 md:p-20 text-center italic text-muted-foreground text-sm">No philosophies documented in the studio archive.</div>
                     ) : (
                       philosophies.map((phil) => (
-                        <div key={phil.id} className="p-10 hover:bg-black/[0.01] transition-all grid md:grid-cols-4 gap-8 items-center">
-                          <div className="md:col-span-1 flex items-center gap-6">
+                        <div key={phil.id} className="p-6 md:p-10 hover:bg-black/[0.01] transition-all flex flex-col md:grid md:grid-cols-4 gap-6 md:gap-8 items-start md:items-center">
+                          <div className="w-full md:col-span-1 flex items-center gap-6">
                             <div className="w-16 h-16 rounded-lg bg-secondary/10 flex items-center justify-center border border-secondary/20">
                               {phil.icon_name === 'Leaf' ? <Leaf className="w-8 h-8 text-secondary" /> :
                                phil.icon_name === 'Scissors' ? <Scissors className="w-8 h-8 text-secondary" /> :
@@ -1126,10 +1126,10 @@ export function Admin() {
                               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2">Pillar ID: {phil.id.slice(0, 8)}</p>
                             </div>
                           </div>
-                          <div className="md:col-span-2">
-                             <p className="text-foreground/70 font-medium italic line-clamp-2 leading-relaxed">"{phil.content}"</p>
+                          <div className="w-full md:col-span-2">
+                             <p className="text-foreground/70 font-medium italic line-clamp-2 leading-relaxed text-sm md:text-base">"{phil.content}"</p>
                           </div>
-                          <div className="md:col-span-1 flex justify-end gap-4">
+                          <div className="w-full md:col-span-1 flex justify-start md:justify-end gap-4">
                             <Button 
                               variant="ghost" 
                               size="icon" 
