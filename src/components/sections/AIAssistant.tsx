@@ -8,9 +8,7 @@ import { GoogleGenAI } from '@google/genai';
 import { toast } from 'sonner';
 
 // Unified SDK Initialization
-const genAI = new GoogleGenAI({
-  apiKey: import.meta.env.VITE_GEMINI_API_KEY || ''
-});
+const genAI = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || '');
 
 const SYSTEM_PROMPT = `
 You are the "Studio Intelligence" for Brenda Crochet Designs. 
@@ -68,18 +66,20 @@ export function AIAssistant() {
     try {
       if (!import.meta.env.VITE_GEMINI_API_KEY) throw new Error("API Key Missing");
 
-      const response = await genAI.models.generateContent({
+      const model = genAI.getGenerativeModel({ 
         model: 'gemini-1.5-flash',
+        systemInstruction: SYSTEM_PROMPT
+      });
+
+      const result = await model.generateContent({
         contents: newMessages.map(m => ({
           role: m.role === 'user' ? 'user' : 'model',
           parts: [{ text: m.content }]
-        })),
-        config: {
-          systemInstruction: SYSTEM_PROMPT
-        }
+        }))
       });
 
-      const aiText = response.text || "I am processing the studio archives...";
+      const response = result.response;
+      const aiText = response.text();
       setMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
     } catch (error) {
       console.error('AI error:', error);
