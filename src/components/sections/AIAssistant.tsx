@@ -68,19 +68,49 @@ export function AIAssistant() {
     try {
       if (!import.meta.env.VITE_GEMINI_API_KEY) throw new Error("API Key Missing");
 
-      const response = await genAI.models.generateContent({
-        model: 'gemini-1.5-flash-latest',
-        contents: newMessages.map(m => ({
-          role: m.role === 'user' ? 'user' : 'model',
-          parts: [{ text: m.content }]
-        })),
-        config: {
-          systemInstruction: SYSTEM_PROMPT
-        }
-      });
+      try {
+        const response = await genAI.models.generateContent({
+          model: 'gemini-1.5-flash-latest',
+          contents: newMessages.map(m => ({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: m.content }]
+          })),
+          config: {
+            systemInstruction: SYSTEM_PROMPT
+          }
+        });
+        const aiText = response.text || "I am processing the studio archives...";
+        setMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
+      } catch (geminiError) {
+        console.warn('Gemini failed, attempting OpenAI fallback...', geminiError);
+        
+        const openAIKey = import.meta.env.VITE_OPENAI_API_KEY;
+        if (!openAIKey) throw geminiError;
 
-      const aiText = response.text || "I am processing the studio archives...";
-      setMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
+        const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openAIKey}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              { role: 'system', content: SYSTEM_PROMPT },
+              ...newMessages.map(m => ({
+                role: m.role === 'user' ? 'user' : 'assistant',
+                content: m.content
+              }))
+            ]
+          })
+        });
+
+        if (!openAIResponse.ok) throw new Error(`OpenAI API error: ${openAIResponse.statusText}`);
+        
+        const data = await openAIResponse.json();
+        const aiText = data.choices[0].message.content;
+        setMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
+      }
     } catch (error) {
       console.error('AI error:', error);
       toast.error("Studio Intelligence link interrupted.");
