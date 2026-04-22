@@ -8,7 +8,9 @@ import { GoogleGenAI } from '@google/genai';
 import { toast } from 'sonner';
 
 // Unified SDK Initialization
-const genAI = new GoogleGenAI(import.meta.env.VITE_GEMINI_API_KEY || '');
+const genAI = new GoogleGenAI({
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY || ''
+});
 
 const SYSTEM_PROMPT = `
 You are the "Studio Intelligence" for Brenda Crochet Designs. 
