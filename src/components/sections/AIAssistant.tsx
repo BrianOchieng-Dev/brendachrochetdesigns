@@ -68,20 +68,18 @@ export function AIAssistant() {
     try {
       if (!import.meta.env.VITE_GEMINI_API_KEY) throw new Error("API Key Missing");
 
-      const model = genAI.getGenerativeModel({ 
+      const response = await genAI.models.generateContent({
         model: 'gemini-1.5-flash',
-        systemInstruction: SYSTEM_PROMPT
-      });
-
-      const result = await model.generateContent({
         contents: newMessages.map(m => ({
           role: m.role === 'user' ? 'user' : 'model',
           parts: [{ text: m.content }]
-        }))
+        })),
+        config: {
+          systemInstruction: SYSTEM_PROMPT
+        }
       });
 
-      const response = result.response;
-      const aiText = response.text();
+      const aiText = response.text || "I am processing the studio archives...";
       setMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
     } catch (error) {
       console.error('AI error:', error);
