@@ -69,7 +69,7 @@ export function AIAssistant() {
       if (!import.meta.env.VITE_GEMINI_API_KEY) throw new Error("API Key Missing");
 
       const response = await genAI.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-1.5-flash-latest',
         contents: newMessages.map(m => ({
           role: m.role === 'user' ? 'user' : 'model',
           parts: [{ text: m.content }]
