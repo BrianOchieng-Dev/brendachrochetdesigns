@@ -258,7 +258,7 @@ export function Home() {
                 </div>
                 
                 <p className="text-base md:text-2xl text-white/60 font-medium italic max-w-2xl mx-auto leading-relaxed px-2">
-                  Unlock the "Virtual Closet," store your Measurement Profile, and track your handcrafted pieces stitch-by-stitch in our exclusive member studio.
+                  Store your Measurement Profile, and track your handcrafted pieces stitch-by-stitch in our exclusive member studio.
                 </p>
 
                 <div className="pt-6 md:pt-10">

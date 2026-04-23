@@ -299,7 +299,6 @@ export function Profile() {
           <div className="flex justify-center overflow-x-auto pb-4">
             <TabsList className="glass-panel p-2 rounded-full gap-2 border-black/5 h-14 bg-white/40 mb-2">
               <TabsTrigger value="OVERVIEW" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all font-bold tracking-[0.1em] text-[10px] md:text-xs uppercase">OVERVIEW</TabsTrigger>
-              <TabsTrigger value="CLOSET" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all font-bold tracking-[0.1em] text-[10px] md:text-xs uppercase">VIRTUAL CLOSET</TabsTrigger>
               <TabsTrigger value="TWIN" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all font-bold tracking-[0.1em] text-[10px] md:text-xs uppercase">DIGITAL TWIN</TabsTrigger>
               <TabsTrigger value="STITCH" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground transition-all font-bold tracking-[0.1em] text-[10px] md:text-xs uppercase">STITCH-BY-STITCH</TabsTrigger>
             </TabsList>
@@ -418,38 +417,7 @@ export function Profile() {
             </div>
           </TabsContent>
 
-          {/* Virtual Closet Content */}
-          <TabsContent value="CLOSET" className="space-y-12 outline-none">
-            <div className="flex justify-between items-end">
-              <div className="space-y-4">
-                <h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-foreground uppercase leading-none">The Virtual <span className="text-secondary italic">Closet</span></h2>
-                <p className="text-muted-foreground text-lg md:text-xl italic font-medium max-w-xl">
-                  Inspect your collection in full 3D detail. Visualize fits before they even arrive.
-                </p>
-              </div>
-              <Button 
-                onClick={() => toast.success('Closet synchronized with 3D Cloud.')}
-                className="rounded-full bg-secondary h-12 px-8 font-bold uppercase tracking-widest text-xs shadow-lg"
-              >
-                <Upload className="w-4 h-4 mr-2" /> Sync Save
-              </Button>
-            </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="text-muted-foreground text-sm italic col-span-full text-center py-20">Your closet is empty.</div>
-              
-              {/* Add New Slot */}
-              <div className="glass-card rounded-lg border-dashed border-black/10 flex flex-col items-center justify-center p-12 space-y-6 text-center hover:bg-black/5 transition-all group">
-                <div className="p-6 rounded-full bg-black/5 group-hover:scale-110 transition-transform">
-                  <Box className="w-12 h-12 text-muted-foreground/30" />
-                </div>
-                <div className="space-y-2">
-                  <p className="font-bold uppercase tracking-widest text-muted-foreground">Available Slot</p>
-                  <p className="text-xs text-muted-foreground/60 italic">Collect pieces to populate your closet.</p>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
 
           {/* Digital Twin Content */}
           <TabsContent value="TWIN" className="space-y-12 outline-none">
