@@ -9,13 +9,13 @@ import { CartProvider } from '@/contexts/CartContext';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 import { AIAssistant } from '@/components/sections/AIAssistant';
 import { WhatsAppFloat } from '@/components/sections/SocialSections';
+import { Sustainability } from '@/pages/Sustainability';
 const Home = lazy(() => import('@/pages/Home').then(m => ({ default: m.Home })));
 
 // Lazy load other pages
 const Portfolio = lazy(() => import('@/pages/Portfolio').then(m => ({ default: m.Portfolio })));
 const Shop = lazy(() => import('@/pages/Shop').then(m => ({ default: m.Shop })));
 const ProductDetail = lazy(() => import('@/pages/ProductDetail').then(m => ({ default: m.ProductDetail })));
-const Sustainability = lazy(() => import('@/pages/Sustainability').then(m => ({ default: m.Sustainability })));
 const Admin = lazy(() => import('@/pages/Admin').then(m => ({ default: m.Admin })));
 const Auth = lazy(() => import('@/pages/Auth').then(m => ({ default: m.Auth })));
 const Profile = lazy(() => import('@/pages/Profile').then(m => ({ default: m.Profile })));

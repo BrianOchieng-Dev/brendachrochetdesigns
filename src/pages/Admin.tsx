@@ -611,7 +611,7 @@ export function Admin() {
             <TabsTrigger value="OVERVIEW" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Overview</TabsTrigger>
             <TabsTrigger value="CUSTOMERS" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Collective</TabsTrigger>
             <TabsTrigger value="CONTENT" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Materiality</TabsTrigger>
-            <TabsTrigger value="PHILOSOPHY" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Philosophy</TabsTrigger>
+            <TabsTrigger value="PHILOSOPHY" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Sustainability</TabsTrigger>
             <TabsTrigger value="INQUIRIES" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Inquiries</TabsTrigger>
             <TabsTrigger value="TECHNICAL" className="rounded-full px-8 h-full data-[state=active]:bg-secondary data-[state=active]:text-white font-bold tracking-widest text-[10px] uppercase transition-all">Operations</TabsTrigger>
           </TabsList>
