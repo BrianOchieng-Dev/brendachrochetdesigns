@@ -38,6 +38,7 @@ import { Product, PortfolioItem, Inquiry, Philosophy } from '@/types';
 import { supabase, isConfigured } from '@/lib/supabase';
 import { useAuth, AdminAuthority, UserRole } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { FashionTrends } from '@/components/admin/FashionTrends';
 import { 
   Tooltip, 
   ResponsiveContainer,
@@ -644,10 +645,10 @@ export function Admin() {
               ))}
             </div>
 
-             <div className="grid grid-cols-1 gap-8">
-              <Card className="glass-panel border-black/5 rounded-lg p-6 md:p-10 space-y-8">
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <Card className="lg:col-span-2 glass-panel border-black/5 rounded-lg p-6 md:p-10 space-y-8 h-full">
                 <CardTitle className="text-xl font-bold uppercase tracking-widest flex items-center gap-3">
-                  <Globe className="w-6 h-6 text-secondary" /> Global Feed
+                  <Globe className="w-6 h-6 text-secondary" /> Studio Ledger
                 </CardTitle>
                 <div className="space-y-8">
                   {activities.map((activity, i) => {
@@ -666,6 +667,10 @@ export function Admin() {
                   })}
                   <Button variant="ghost" className="w-full rounded-full border border-black/5 font-bold uppercase tracking-widest text-[10px] h-12 hover:bg-black/5">View Full Ledger</Button>
                 </div>
+              </Card>
+
+              <Card className="glass-panel border-black/5 rounded-lg p-6 md:p-10 space-y-8 h-full bg-secondary/[0.02]">
+                <FashionTrends />
               </Card>
             </div>
           </TabsContent>
